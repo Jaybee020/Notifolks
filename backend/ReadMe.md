@@ -10,12 +10,22 @@ Clone the repository
 
 Cd into backend folder
 ```bash
-    git clone https://github.com/Jaybee020/Haven-API.git
+    cd backend
 ```
 
-If you have docker installed run the command below
+If you have docker installed change the redis url in config file
+```bash
+   export const REDIS_URL= "redis://redis"
+```
+
+Run the command below
 ```bash
    docker-compose up
+```
+
+If not change the redis url in config file
+```bash
+   export const REDIS_URL= "127.0.0.1:6379"
 ```
 
 Install node dependencies

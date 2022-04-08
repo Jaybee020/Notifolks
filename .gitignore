@@ -3,3 +3,4 @@ folks-finance-js-sdk
 .env
 mongo
 redis_data
+docker-compose.yml
