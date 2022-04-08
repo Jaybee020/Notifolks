@@ -240,12 +240,12 @@ All parameters are to be in req.body.A transfer of 0.01 algos is made to create 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
-| `tokenPairKeyIndex` | `string` | **Required**. Address of escrow account used for loan |
-| `password` | `string` | **Required**. Address of escrow account used for loan |
+| `tokenPairKeyIndex` | `string` | **Required**. token pair index used for loan |
+| `password` | `string` | **Required**. password used to authenticate transactions |
 response.body
 ```bash
 {   status:true,
-    message:"Successful Creation of Alert"}
+    message:"Loan repayed"}
 ```
 
 ## Demo
