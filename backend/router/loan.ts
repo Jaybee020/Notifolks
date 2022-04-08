@@ -4,7 +4,7 @@ import { UserAlertModel } from "../models/UserAlert"
 import { tokenPairKeys } from "../app"
 import {isValidAddress,mnemonicToSecretKey,waitForConfirmation} from "algosdk";
 import { takeLoan } from "../helpers/takeLoan";
-import { Address, sender } from "../config";
+import { Address } from "../config";
 import { repayLoan } from "../helpers/repay";
 import { getAllLoanInfo } from "../helpers/getAllLoanInfo";
 import { transferAlgoOrAsset } from "../src/v1/utils";

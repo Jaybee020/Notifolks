@@ -1,5 +1,7 @@
 #the image you want to pull including version number and os
-FROM node:16-alpine
+FROM node:16
+
+
 
 #changing the user from root to node
 USER node
@@ -11,17 +13,17 @@ RUN mkdir /home/node/src
 WORKDIR /home/node/src
 
 #Copies everything from this folder to container (copy package.json first to maximise docker caching)
-COPY --chown=node:node package.json package-lock.json ./
+COPY --chown=node:node package.json package-lock.json /home/node/src/
 
 #installs everything in the package-lock json in the container
 RUN npm install
 
-
+RUN npm update formidable
 #Copies everything from this folder to container 
-COPY --chown=node:node . .
+COPY --chown=node:node . /home/node/src/
 
 
 EXPOSE 3000
 
-CMD [ " npx ts-node","app.ts" ]
+CMD ["npm", "start"]
 

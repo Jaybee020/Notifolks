@@ -1,11 +1,21 @@
 
-# Haven 
+# NotiFolks
 
-This is the REST API of NotifFolks space,an end to end encrypted messaging platform written in typescript.
+This is the REST API of NotifFolks ,a platform where users can set alerts for their several loans on the folks finance platform.
 ## Download and Build on local
 Clone the repository
 ```bash
     git clone https://github.com/Jaybee020/Haven-API.git
+```
+
+Cd into backend folder
+```bash
+    git clone https://github.com/Jaybee020/Haven-API.git
+```
+
+If you have docker installed run the command below
+```bash
+   docker-compose up
 ```
 
 Install node dependencies

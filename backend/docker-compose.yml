@@ -5,20 +5,20 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/home/node/code
-      - /home/node/code/node_modules
+      - ./:/home/node/src
+      - /home/node/src/node_modules/
     links:
-      - mongo
+      - db
       - redis
     environment:
-      MONGO_CONNECTION_STRING: mongodb://mongo:27017/Notifications
-      API_KEY: Xy8NsXxfJg2cQ2YQ4pax6aLrTcj55jZ9mbsNCM30 
+      MONGO_CONNECTION_STRING: mongodb://db:27017/Notifications
+      API_KEY: 'YOUR API KEY'
       REDIS_URL: redis://redis
-      APP_EMAIL: gaykinrele002@gmail.com
-      APP_EMAIL_PASS: yejtzcienrovrfdg
+      APP_EMAIL: 'your email'
+      APP_EMAIL_PASS: 'your email password'
 
-  mongo:
-    container_name: mongo
+  db:
+    container_name: db
     image: mongo
     volumes: 
       - ./mongo/data:/data/db

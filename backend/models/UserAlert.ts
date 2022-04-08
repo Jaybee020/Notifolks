@@ -1,8 +1,9 @@
 import {Schema,model,Document,Model,ObjectId,Types} from "mongoose"
 import {TestnetTokenPairs, TestnetTokenPairsKey, TokenPair} from '../folks-finance-js-sdk/src'
+import { User } from "./User"
 
 export interface UserAlert extends Document{
-    user:ObjectId,
+    user:any,
     escrowAddr:string,
     tokenPairIndex:number,
     dateCreated:Date,

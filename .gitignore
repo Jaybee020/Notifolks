@@ -1,3 +1,5 @@
 node_modules
 folks-finance-js-sdk
 .env
+mongo
+redis_data
