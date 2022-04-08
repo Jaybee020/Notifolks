@@ -13,7 +13,7 @@ Cd into backend folder
     cd backend
 ```
 
-If you have docker installed change the redis url in config file
+If you have docker installed change the redis url in workers config file
 ```bash
    export const REDIS_URL= "redis://redis"
 ```
@@ -23,7 +23,7 @@ Run the command below
    docker-compose up
 ```
 
-If not change the redis url in config file
+If not change the redis url in workers config file
 ```bash
    export const REDIS_URL= "127.0.0.1:6379"
 ```
