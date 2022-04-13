@@ -1,0 +1,398 @@
+@import url("./reset.css");
+@import url("./fonts.css");
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100%;
+  max-width: 1440px;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body {
+  margin: 0;
+  padding: 0;
+  font-family: montreal, -apple-system, BlinkMacSystemFont, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Segoe UI,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+  -ms-scroll-chaining: none;
+  overscroll-behavior: none;
+  background: #0e0e0e;
+  background: #111;
+}
+
+// Dimensions
+$pad_default: 35px;
+$nav_height: 52px;
+$pad_hor: 30px;
+$pad_horizontal: 5vw;
+$sidenav_width: 290px;
+$mainapp_width: calc(100% - $sidenav_width);
+
+// Colors
+$fade_color: #757575;
+$bg_color: #fff;
+$default_color: #ddd;
+$dark: #111;
+$light: #ccc;
+$light2: #eee;
+$fade_background: #333;
+
+//Instruction sets
+$border: 1px solid #444;
+
+// Mixins
+@mixin font_bold {
+  font-family: montreal2;
+}
+@mixin centered {
+  align-items: center;
+  justify-content: center;
+}
+@mixin width_config {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: calc(100% - ($pad_horizontal * 2));
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  color: $default_color;
+  letter-spacing: 0.01em;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+
+  div {
+    display: flex;
+  }
+
+  .top_nav {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+
+    @include width_config;
+    margin-top: $pad_default;
+  }
+
+  .top_nav_first {
+    .side_top_sect {
+      width: 100%;
+      height: $nav_height;
+      align-items: center;
+      flex-direction: row;
+      font-size: 20px;
+      letter-spacing: 0.02em;
+      font-family: montreal2;
+      text-transform: uppercase;
+      i {
+        font-size: 19px;
+      }
+    }
+    .top_configs {
+      align-items: center;
+      .user_details {
+        padding-left: 15px;
+        padding-bottom: 5px;
+        .user_img {
+          width: 32px;
+          height: 32px;
+          margin-top: 3px;
+          margin-right: 10px;
+          border-radius: 100%;
+          overflow: hidden;
+
+          img {
+            width: 100%;
+            object-fit: cover;
+            object-position: top;
+            border-radius: 100%;
+          }
+        }
+
+        .user_wallet_mail {
+          font-size: 14px;
+          flex-direction: column;
+          justify-content: center;
+          .user_wallet {
+            font-size: 10px;
+            color: $fade_color;
+          }
+        }
+      }
+      .dropdown_button {
+        flex: 1;
+        font-size: 20px;
+        color: $fade_color;
+        align-items: center;
+        padding: 0px 10px 1px 7px;
+        justify-content: center;
+      }
+    }
+  }
+  .top_nav_second {
+    padding-bottom: 20px;
+    .account_details {
+      align-items: center;
+      flex-direction: row;
+      .acct_dets_cover {
+        align-items: center;
+        flex-direction: row;
+
+        margin-right: 40px;
+
+        .acct_dets_icon {
+          width: 50px;
+          height: 50px;
+          font-size: 22px;
+          margin-right: 16px;
+          border-radius: 8px;
+          align-items: center;
+          justify-content: center;
+          background: $fade_background;
+        }
+
+        .acct_dets_value_title {
+          max-height: 50px;
+          padding-bottom: 3px;
+          flex-direction: column;
+          font-family: montreal2;
+          .acct_dets_value {
+            font-size: 20px;
+            margin-bottom: 4px;
+          }
+          .acct_dets_title {
+            font-size: 10px;
+            color: $fade_color;
+            text-transform: uppercase;
+          }
+        }
+      }
+    }
+
+    .action_buttons {
+      .action_button {
+        height: 45px;
+        width: 132px;
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        flex-direction: row;
+        border-radius: 8px;
+        white-space: nowrap;
+        transition: all 0.3s;
+        justify-content: center;
+        border: 1px solid $light;
+        &:hover {
+          color: $light2;
+          background: $fade_background;
+        }
+        &:last-child {
+          color: $dark;
+          margin-left: 18px;
+          border-color: $light2;
+          background: $light2;
+        }
+      }
+    }
+  }
+}
+
+.pages_container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  padding-top: $pad_default;
+  padding-bottom: 20px;
+  flex-direction: column;
+
+  @include width_config;
+
+  .pages_cover {
+    width: 100%;
+    height: 100%;
+    overflow-x: scroll;
+    flex-direction: column;
+
+    // Loan Pages
+    .loan_item,
+    .loan_item_hd {
+      display: flex;
+      padding: 25px 0px 20px;
+      flex-direction: row;
+      width: max-content;
+      min-width: 100%;
+      border-bottom: $border;
+      justify-content: space-between;
+
+      div {
+        overflow: hidden;
+        padding: 0px 20px;
+        flex-direction: row;
+        justify-content: center;
+        p {
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-align: end;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .loan_escrow {
+        left: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+        position: sticky;
+        background: $dark;
+        min-width: 310px;
+        max-width: 310px;
+        p {
+          width: 100%;
+          text-align: start;
+        }
+      }
+      .loan_borrowed,
+      .loan_collateral,
+      .loan_borrowBalance,
+      .loan_borrowBalanceLiquidation {
+        min-width: 180px;
+        max-width: 180px;
+        // border-right: $border;
+      }
+      .loan_healthFactor {
+        min-width: 100px;
+        max-width: 100px;
+        // border-right: $border;
+      }
+    }
+    .loan_item_hd {
+      color: $fade_color;
+      border-bottom: $border;
+      .loan_escrow {
+        border-right: 0px;
+      }
+    }
+
+    //New Loan
+    .loans_inn {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      flex-direction: row;
+      align-items: center;
+
+      .side_illustration {
+        flex: 1;
+        padding-bottom: 50px;
+        align-items: center;
+        flex-direction: row;
+        justify-content: flex-end;
+
+        img {
+          width: 100%;
+          opacity: 0.7;
+          max-width: 500px;
+        }
+      }
+
+      .loan_form {
+        width: 500px;
+        flex-direction: column;
+        .page_header {
+          font-size: 20px;
+          margin-bottom: 10px;
+          text-transform: uppercase;
+        }
+        .hd_txt {
+          margin: 20px 0px;
+          color: $fade_color;
+          flex-direction: row;
+          align-items: center;
+          text-transform: uppercase;
+          span {
+            margin-top: 4px;
+            font-size: 15px;
+            margin-right: 6px;
+          }
+        }
+        .loan_currency_pair {
+          flex-direction: column;
+          .currency_pair_list {
+            flex-direction: row;
+            .currency_pair {
+              flex: 1;
+              height: 42px;
+              display: flex;
+              border: $border;
+              border-radius: 8px;
+              flex-direction: row;
+              p {
+                width: 50%;
+                display: flex;
+                text-align: center;
+                align-items: center;
+                justify-content: center;
+                &:first-child {
+                  border-right: $border;
+                }
+              }
+            }
+            .pair_list_drop_down {
+              width: 45px;
+              height: 42px;
+              cursor: pointer;
+              border: $border;
+              margin-left: 18px;
+              border-radius: 8px;
+              align-items: center;
+              justify-content: center;
+              transition: background 0.2s;
+              &:hover {
+                background: $fade_background;
+              }
+            }
+          }
+        }
+        .loan_amount {
+          flex-direction: column;
+          input {
+            height: 42px;
+            border: $border;
+            border-radius: 8px;
+            padding: 0px 20px;
+          }
+        }
+        .get_loan_button {
+          width: 100%;
+          height: 45px;
+          color: $dark;
+          cursor: pointer;
+          margin: 30px 0px;
+          border-radius: 8px;
+          align-items: center;
+          background: $light2;
+          border-color: $light2;
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  div {
+    display: flex;
+  }
+}

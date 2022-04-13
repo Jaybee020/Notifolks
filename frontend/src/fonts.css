@@ -1,0 +1,37 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900");
+
+@font-face {
+  font-family: "machina";
+  src: url("./fonts/NeueMachina-Light.otf");
+}
+@font-face {
+  font-family: "machina2";
+  src: url("./fonts/NeueMachina-Regular.otf");
+}
+
+@font-face {
+  font-family: montreal;
+  src: url("./fonts/Neue-montreal/NeueMontreal-Regular.otf");
+}
+@font-face {
+  font-family: montreal2;
+  src: url("./fonts/Neue-montreal/NeueMontreal-Medium.otf");
+}
+
+@font-face {
+  font-family: pp;
+  src: url("./fonts/PPNeueMontreal-Book.otf");
+}
+
+@font-face {
+  font-family: founders_l;
+  src: url("./fonts/Founders/FoundersGrotesk-Light.otf");
+}
+@font-face {
+  font-family: founders_r;
+  src: url("./fonts/Founders/FoundersGrotesk-Regular.otf");
+}
+@font-face {
+  font-family: founders_sb;
+  src: url("./fonts/Founders/FoundersGrotesk-Semibold.otf");
+}
