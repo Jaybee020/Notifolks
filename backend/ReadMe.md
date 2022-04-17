@@ -62,7 +62,7 @@ response.body
 
 ### Search for loan alerts by account address
 ```http
-GET folks/loanAlert/accountAddr/:accountAddr
+GET /folks/loanAlert/accountAddr/:accountAddr
 ```
 All parameters are to be in URL
 | Parameter | Type     | Description                |
