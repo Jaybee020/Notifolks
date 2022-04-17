@@ -9,19 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.repayLoan = void 0;
-const src_1 = require("../src");
+exports.sendtxn = void 0;
 const config_1 = require("../config");
-function repayLoan(escrowAddr, repayAmount, tokenPairKey, senderAddr) {
+const algosdk_1 = require("algosdk");
+function sendtxn(signedTxns) {
     return __awaiter(this, void 0, void 0, function* () {
-        let txns;
-        const tokenPair = src_1.TestnetTokenPairs[tokenPairKey];
-        const reserveAddress = src_1.TestnetReserveAddress;
-        // retrieve params
-        const params = yield config_1.algodClient.getTransactionParams().do();
-        // repay
-        txns = (0, src_1.prepareRepayTransactions)(tokenPair, senderAddr, escrowAddr, reserveAddress, repayAmount, params);
-        return txns;
+        let txId = (yield config_1.algodClient.sendRawTransaction(signedTxns).do()).txId;
+        yield (0, algosdk_1.waitForConfirmation)(config_1.algodClient, txId, 1000);
+        return txId;
     });
 }
-exports.repayLoan = repayLoan;
+exports.sendtxn = sendtxn;

@@ -1,25 +1,25 @@
-import { waitForConfirmation,mnemonicToSecretKey } from "algosdk";
+import { Transaction } from "algosdk";
 import {
   prepareAddEscrowTransactions,
   prepareBorrowTransactions,
-  prepareRepayTransactions,
   TestnetOracle,
-  TestnetReserveAddress,
   TestnetTokenPairs,
   TestnetTokenPairsKey,
-  TokenPair,
 } from "../src";
 import { algodClient } from "../config";
 
 
-export async function takeLoan(accountAddr:string,collateralAmount:number,borrowAmount:number,tokenPairKey:TestnetTokenPairsKey,mnemonic:string) {
-    let txns, signedTxns, txId;
-  
-    const sender = mnemonicToSecretKey(mnemonic)
-    if(accountAddr!=sender.addr){
-        return "Addresses do not match"
-    }
+interface OutputObj{
+  escrowAddr:string,
+  signedEscrowTxn:Uint8Array,
+  unsignedUserTxn:Transaction[],
+  borrowTxns:Transaction[]
 
+}
+
+export async function takeLoan(accountAddr:string,collateralAmount:number,borrowAmount:number,tokenPairKey:TestnetTokenPairsKey):Promise<OutputObj> {
+    let txns;
+  
     const oracle = TestnetOracle;
     console.log(tokenPairKey)
     const tokenPair = TestnetTokenPairs[tokenPairKey];
@@ -31,20 +31,13 @@ export async function takeLoan(accountAddr:string,collateralAmount:number,borrow
     const addEscrowTxns = prepareAddEscrowTransactions(tokenPair, accountAddr, params);
     const escrow = addEscrowTxns.escrow;
     txns = addEscrowTxns.txns;
-    signedTxns = [txns[0].signTxn(sender.sk), txns[1].signTxn(escrow.sk), txns[2].signTxn(sender.sk)];
-    txId = (await algodClient.sendRawTransaction(signedTxns).do()).txId;
-    await waitForConfirmation(algodClient, txId, 1000);
-    console.log("Reached here")
-  
-    // borrow
+    const signedEscrowTxn= txns[1].signTxn(escrow.sk)
+     // // borrow
     txns = prepareBorrowTransactions(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
-    signedTxns = txns.map(txn => txn.signTxn(sender.sk));
-    txId = (await algodClient.sendRawTransaction(signedTxns).do()).txId;
-    await waitForConfirmation(algodClient, txId, 1000);
-    console.log("Reached here 2")
-
-
-
-    return escrow.addr
-  
+    return {
+      escrowAddr:escrow.addr,
+      signedEscrowTxn:signedEscrowTxn,
+      unsignedUserTxn:[txns[0],txns[2]],
+      borrowTxns:txns
+    }
   }

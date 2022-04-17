@@ -44,9 +44,6 @@ const morgan_1 = __importDefault(require("morgan"));
 const dotenv = __importStar(require("dotenv"));
 const loan_1 = require("./router/loan");
 const sendAlert_1 = require("./workers/sendAlert");
-const register_1 = require("./router/register");
-const login_1 = require("./router/login");
-const logout_1 = require("./router/logout");
 exports.tokenPairKeys = ["ALGO-USDC", "ALGO-USDt", "ALGO-goBTC", "ALGO-goETH", "ALGO-xUSD", "USDC-ALGO", "USDC-USDt", "USDC-goBTC", "USDC-goETH", "USDC-xUSD", "USDt-ALGO", "USDt-USDC", "USDt-goBTC", "USDt-goETH", "USDt-xUSD", "goBTC-ALGO", "goBTC-USDC", "goBTC-USDt", "goBTC-goETH", "goBTC-xUSD", "goETH-ALGO", "goETH-USDC", "goETH-USDt", "goETH-goBTC", "goETH-xUSD", "xUSD-ALGO", "xUSD-USDC", "xUSD-USDt", "xUSD-goBTC", "xUSD-goETH"];
 dotenv.config();
 const uri = String(process.env.MONGO_CONNECTION_STRING);
@@ -67,9 +64,6 @@ app.get("/", function (req, res) {
     });
 });
 app.use("/folks", loan_1.folksFinanceRouter);
-app.use("/register", register_1.registerRoute);
-app.use("/login", login_1.loginRoute);
-app.use("/logout", logout_1.logoutRoute);
 app.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
     sendAlert_1.sendAlert.start();
     console.log(`Listening on ${PORT}`);

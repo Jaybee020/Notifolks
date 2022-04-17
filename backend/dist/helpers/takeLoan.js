@@ -10,16 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.takeLoan = void 0;
-const algosdk_1 = require("algosdk");
 const src_1 = require("../src");
 const config_1 = require("../config");
-function takeLoan(accountAddr, collateralAmount, borrowAmount, tokenPairKey, mnemonic) {
+function takeLoan(accountAddr, collateralAmount, borrowAmount, tokenPairKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        let txns, signedTxns, txId;
-        const sender = (0, algosdk_1.mnemonicToSecretKey)(mnemonic);
-        if (accountAddr != sender.addr) {
-            return "Addresses do not match";
-        }
+        let txns;
         const oracle = src_1.TestnetOracle;
         console.log(tokenPairKey);
         const tokenPair = src_1.TestnetTokenPairs[tokenPairKey];
@@ -29,17 +24,15 @@ function takeLoan(accountAddr, collateralAmount, borrowAmount, tokenPairKey, mne
         const addEscrowTxns = (0, src_1.prepareAddEscrowTransactions)(tokenPair, accountAddr, params);
         const escrow = addEscrowTxns.escrow;
         txns = addEscrowTxns.txns;
-        signedTxns = [txns[0].signTxn(sender.sk), txns[1].signTxn(escrow.sk), txns[2].signTxn(sender.sk)];
-        txId = (yield config_1.algodClient.sendRawTransaction(signedTxns).do()).txId;
-        yield (0, algosdk_1.waitForConfirmation)(config_1.algodClient, txId, 1000);
-        console.log("Reached here");
-        // borrow
+        const signedEscrowTxn = txns[1].signTxn(escrow.sk);
+        // // borrow
         txns = (0, src_1.prepareBorrowTransactions)(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
-        signedTxns = txns.map(txn => txn.signTxn(sender.sk));
-        txId = (yield config_1.algodClient.sendRawTransaction(signedTxns).do()).txId;
-        yield (0, algosdk_1.waitForConfirmation)(config_1.algodClient, txId, 1000);
-        console.log("Reached here 2");
-        return escrow.addr;
+        return {
+            escrowAddr: escrow.addr,
+            signedEscrowTxn: signedEscrowTxn,
+            unsignedUserTxn: [txns[0], txns[2]],
+            borrowTxns: txns
+        };
     });
 }
 exports.takeLoan = takeLoan;

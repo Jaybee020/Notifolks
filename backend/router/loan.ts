@@ -9,15 +9,13 @@ import { repayLoan } from "../helpers/repay";
 import { getAllLoanInfo } from "../helpers/getAllLoanInfo";
 import { transferAlgoOrAsset } from "../src/v1/utils";
 import { algodClient } from "../config";
-import {ObjectId,Types} from "mongoose"
-import { authenticatetoken, Req } from "../middleware/authenticate";
-import { AES } from "crypto-js";
+import { sendtxn } from "../helpers/sendtxn";
+import { findReceiptTxn } from "../helpers/findtxn";
 const router=express.Router()
 
 router.get("",async (req:Request,res:Response) => {
     res.send("Reached Here")
 })
-
 //gets Loan of Specified User
 router.get("/getloan/:accountAddr",async function (req:Request,res:Response) {
     try {
@@ -37,24 +35,15 @@ router.get("/getloan/:accountAddr",async function (req:Request,res:Response) {
     
     
 })
-
 //get Alerts by account address
-router.get("/loanAlert/userId/:userId",async function (req:Request,res:Response) {
+router.get("/loanAlert/accountAddr/accountAddr",async function (req:Request,res:Response) {
     try {
-        const userId=req.params.userId
-        const loanInfos=await UserAlertModel.find({user:new Types.ObjectId(userId)}).populate("User")
+        const accountAddr=req.params.accountAddr
+        const loanInfos=await UserAlertModel.find({accountAddr:accountAddr})
          if(loanInfos){
                 res.status(200).send({
                     status:true,
-                    message:loanInfos.map((loanInfo)=>{
-                    return {
-                        executed:loanInfo.executed,
-                        user:loanInfo.user,
-                        escrowAddr:loanInfo.escrowAddr,
-                        reminderHealthRatio:loanInfo.reminderHealthRatio,
-                        tokenPairKeys:tokenPairKeys[loanInfo.tokenPairIndex]
-                    }
-                })
+                    message:loanInfos
                 })
         }else{
             res.status(400).send({
@@ -68,44 +57,12 @@ router.get("/loanAlert/userId/:userId",async function (req:Request,res:Response)
 })
 
 
-//get Alerts by token
-router.get("/loanAlert/tokenPairIndex/:tokenPairIndex",async function (req:Request,res:Response) {
-    try {
-        const tokenPairIndex=req.params.tokenPairIndex
-        if(!tokenPairIndex){
-            return res.status(400).send({
-                status:false,
-                message:"Invalid account Address given",
-            })}
-        const loanInfos=await UserAlertModel.find({tokenPairIndex:parseInt(tokenPairIndex)}).populate("User")
-        if(loanInfos){
-            res.status(200).send({
-                status:true,
-                message:loanInfos.map((loanInfo)=>{
-                    return {
-                        executed:loanInfo.executed,
-                        user:loanInfo.user,
-                        escrowAddr:loanInfo.escrowAddr,
-                        reminderHealthRatio:loanInfo.reminderHealthRatio,
-                        tokenPairKeys:tokenPairKeys[loanInfo.tokenPairIndex]
-                    }
-                })
-            })
-        }else{
-            res.status(400).send({
-                status:false,
-                message:"Alert for specified index does not exist"
-            })
-            }
-    } catch (error) {
-        console.error(error)
-    }
-})
+
 // creates a new alert document with escrow
-router.post("/createloanAlert",authenticatetoken,async function (req:Req,res:Response) {
+router.post("/createloanAlertTransaction",async function (req:Request,res:Response) {
     try {
-        const {escrowAddr,tokenPairIndex,reminderHealthRatio,password}=req.body
-        if ( !escrowAddr || !tokenPairIndex  || !password){
+        const {escrowAddr,tokenPairIndex,reminderHealthRatio,accountAddr}=req.body
+        if ( !escrowAddr || !tokenPairIndex  ||reminderHealthRatio){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
@@ -120,48 +77,16 @@ router.post("/createloanAlert",authenticatetoken,async function (req:Req,res:Res
         if(!loanInfo){
             return res.status(400).send({
                 status:true,
-            message:"Could not find loan"
+                message:"Could not find loan"
             })
         }
-        if(req.user){
-            req.user.checkPassword(password,async function(err:Error,isMatch:Boolean){
-            if(!isMatch){
-                return res.status(401).json({
-                    message:"Username and password do not match"
-                })
-            }
-            const accountAddr=String(req.user?.accountAddr)
-            const userId=new Types.ObjectId(req.user?._id)
-            const bytes=AES.decrypt(String(req.user?.mnemonic_phrase),password)
-            var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-            const sender = mnemonicToSecretKey(originalmnemonic)
-                 //Transaction for creating loanAlert
-            try {
-                const params = await algodClient.getTransactionParams().do();
-                const loanCreateTxn=transferAlgoOrAsset(79413584,accountAddr,Address,1e5,params)
-                const signedTxn=loanCreateTxn.signTxn(sender.sk)
-                const txId = (await algodClient.sendRawTransaction(signedTxn).do()).txId;
-                await waitForConfirmation(algodClient, txId, 1000);
-            } catch (error) {
-                return res.status(400).send({
-                    status:false,
-                    message:"Error in transaction occured"
-                })
-            }
-            await UserAlertModel.create({
-                user:userId,
-                escrowAddr:escrowAddr,
-                reminderHealthRatio:reminderHealthRatio,
-                tokenPairIndex:parseInt(tokenPairIndex)})
-            res.status(200).send({
-                status:true,
-                message:"Successful Creation of Alert"
-            })
-
-            })
-        }
-        
-       
+        //Transaction for creating loanAlert
+        const params = await algodClient.getTransactionParams().do();
+        const loanCreateTxn=transferAlgoOrAsset(79413584,accountAddr,Address,1e5,params)
+        res.status(200).send({
+            status:true,
+            data:loanCreateTxn
+        })
     } catch (error) {
         console.error(error)
         res.status(400).send({
@@ -171,33 +96,52 @@ router.post("/createloanAlert",authenticatetoken,async function (req:Req,res:Res
     }
 })
 
-router.post('/newLoan',authenticatetoken,async function (req:Req,res:Response) {
+router.post("/createloanAlert",async function(req:Request,res:Response){
+    const {txId,email,accountAddr,escrowAddr,reminderHealthRatio,tokenPairIndex}=req.body
+    const foundAlert=await UserAlertModel.findOne({
+        transactionId:txId
+    })
+    if(foundAlert){
+        return res.status(200).send({
+            status:true,
+            message:"Transaaction Id has been used to create alert"
+        })
+    }
+    let txIdExist=await findReceiptTxn(accountAddr,txId)
+    if(!txIdExist){
+        return res.status(400).send({
+            message:"Couldn't find receipt transaction"
+        })
+    }
+    await UserAlertModel.create({
+        accountAddr:accountAddr,
+        email:email,
+        escrowAddr:escrowAddr,
+        reminderHealthRatio:reminderHealthRatio,
+        transactionId:txId,
+        tokenPairIndex:parseInt(tokenPairIndex)})
+    return res.status(200).send({
+        status:true,
+        message:"Successful Creation of Alert"
+    })
+
+})
+
+router.post('/newLoan',async function (req:Request,res:Response) {
     try {
-        const {collateralAmount,borrowAmount,tokenPairIndex,password}=req.body
-        if (!collateralAmount || !borrowAmount ||tokenPairIndex || !password){
+        const {collateralAmount,borrowAmount,tokenPairIndex,password,accountAddr}=req.body
+        if (!collateralAmount || !borrowAmount ||tokenPairIndex || !password||accountAddr){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
              });
         }
-        if(req.user){
-            req.user.checkPassword(password,async function(err:Error,isMatch:Boolean){
-                if(!isMatch){
-                    return res.status(401).json({
-                        message:"Username and password do not match"
-                    })
-                }
-                    const accountAddr=req.user?.accountAddr
-                    const bytes=AES.decrypt(String(req.user?.mnemonic_phrase),password)
-                    var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-                    const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
-                    const escrow =await takeLoan(String(accountAddr),parseInt(collateralAmount),parseInt(borrowAmount),key,originalmnemonic)
-                    return res.status(200).send({
-                        status:true,
-                        escrowAddr:escrow
-                    })
-            })
-        }
+        const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
+        const data =await takeLoan(String(accountAddr),parseInt(collateralAmount),parseInt(borrowAmount),key)
+        return res.status(200).send({
+            status:true,
+            data:data
+        })
     } catch (error) {
         console.error(error)
         return res.status(400).send({
@@ -205,8 +149,6 @@ router.post('/newLoan',authenticatetoken,async function (req:Req,res:Response) {
             message:"Couldn't take a new Loan"
         })
     }
-    
-
 })
 
 
@@ -231,7 +173,6 @@ router.get("/currentLoanInfo/:escrowAddr/:tokenPairIndex",async function (req:Re
         console.log(Date.now())
         const loanInfo=await getCurrentLoanInfo(escrowAddr,tokenPairKey)
         console.log(Date.now())
-        console.log("ReachedHere")
         return res.status(200).send({
             status:true,
             message:{
@@ -253,8 +194,8 @@ router.get("/currentLoanInfo/:escrowAddr/:tokenPairIndex",async function (req:Re
     
 });
 
-router.post("/repayLoan",authenticatetoken,async function (req:Req,res:Response) {
-    let {escrowAddr,repayAmount,tokenPairIndex,password}=req.body
+router.post("/repayLoanTxn",async function (req:Request,res:Response){
+    let {escrowAddr,repayAmount,tokenPairIndex,accountAddr}=req.body
     tokenPairIndex=parseInt(tokenPairIndex)
     if ( !escrowAddr || !String(tokenPairIndex) ){
         return res.status(400).send({
@@ -268,32 +209,17 @@ router.post("/repayLoan",authenticatetoken,async function (req:Req,res:Response)
             message:"Invalid account Address given",
         })
     }
-    let tokenPairKey=tokenPairKeys[tokenPairIndex]
     try {
         // repay loan
-        if(req.user){
-            req.user.checkPassword(password,async function(err:Error,isMatch:Boolean){
-                if(!isMatch){
-                    return res.status(401).json({
-                        message:"Username and password do not match"
-                    })
-                }
-                //decrypt to get key
-                const accountAddr=req.user?.accountAddr
-                const bytes=AES.decrypt(String(req.user?.mnemonic_phrase),password)
-                var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-                const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
-                const repay_status=await repayLoan(escrowAddr,repayAmount,tokenPairKey,originalmnemonic)
-                console.log("ReachedHere2")
-                if(repay_status){
-                    return res.status(200).send({
-                        status:true,
-                        message:"Loan repayed"
-                    })
-                }
+        const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
+        const repaytxn=await repayLoan(escrowAddr,repayAmount,key,accountAddr)
+        console.log("ReachedHere2")
+        if(repaytxn){
+            return res.status(200).send({
+                status:true,
+                data:repaytxn,
             })
         }
-        
     } catch (error) {
         return res.status(400).send({
             status:false,
@@ -303,6 +229,14 @@ router.post("/repayLoan",authenticatetoken,async function (req:Req,res:Response)
     
 });
 
+
+router.post("/processtxn",async function(req:Request,res:Response){
+    let{txns}=req.body
+    let txId=await sendtxn(txns)
+    return res.status(200).send({
+        txid:txId
+    })
+})
 
 export const folksFinanceRouter=router
 

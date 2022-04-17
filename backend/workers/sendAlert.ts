@@ -31,18 +31,19 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
     try {
         const allAlerts=await UserAlertModel.find({
             executed:false
-        }).populate("User")//get all Alerts that have not been executed
+        })//get all Alerts that have not been executed
         if(allAlerts){
+            console.log("Alert exist")
             allAlerts.forEach(async(anAlert)=>{
                 let message, title, recipient;
-                console.log(anAlert.user.email)
+                console.log(anAlert.email)
                 const loanInfo=await getCurrentLoanInfo(anAlert.escrowAddr,tokenPairKeys[anAlert.tokenPairIndex])
                 console.log(loanInfo)
                 if(loanInfo.healthFactor/BigInt(1e14)<BigInt(anAlert.reminderHealthRatio)){
                     message = `${tokenPairKeys[anAlert.tokenPairIndex]} has just gone below your reminder health ratio of ${anAlert.reminderHealthRatio}.
                     Current health Ratio is  ${loanInfo.healthFactor}.`;
                     title = `${tokenPairKeys[anAlert.tokenPairIndex]} loan Alert!`;
-                    recipient = anAlert.user.email;
+                    recipient = anAlert.email;
     
                     //add to alerts Que
                     alertsQueue.add(
@@ -60,7 +61,7 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                     console.log("Reached here 4")
                 }
             })
-        }
+        }else{console.log("No alert")}
         // let message, title, recipient;
         // message = "Welcome"
         // title = "Notification";

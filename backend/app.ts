@@ -7,9 +7,6 @@ import * as dotenv from"dotenv"
 import { TestnetTokenPairsKey } from "./src"
 import { folksFinanceRouter } from "./router/loan"
 import { sendAlert } from "./workers/sendAlert"
-import { registerRoute } from "./router/register"
-import { loginRoute } from "./router/login"
-import { logoutRoute } from "./router/logout"
 
 export const tokenPairKeys:TestnetTokenPairsKey[]=["ALGO-USDC" , "ALGO-USDt" , "ALGO-goBTC" , "ALGO-goETH" , "ALGO-xUSD" , "USDC-ALGO" , "USDC-USDt" , "USDC-goBTC" , "USDC-goETH" , "USDC-xUSD" , "USDt-ALGO" , "USDt-USDC" , "USDt-goBTC" , "USDt-goETH" , "USDt-xUSD" , "goBTC-ALGO" , "goBTC-USDC" , "goBTC-USDt" ,"goBTC-goETH", "goBTC-xUSD" , "goETH-ALGO", "goETH-USDC", "goETH-USDt", "goETH-goBTC" , "goETH-xUSD" , "xUSD-ALGO" ,"xUSD-USDC", "xUSD-USDt", "xUSD-goBTC", "xUSD-goETH"]
 dotenv.config()
@@ -33,9 +30,6 @@ app.get("/",async function (req:Request,res:Response) {
 })
 
 app.use("/folks",folksFinanceRouter)
-app.use("/register",registerRoute)
-app.use("/login",loginRoute)
-app.use("/logout",logoutRoute)
 
 
 app.listen(PORT,async()=>{

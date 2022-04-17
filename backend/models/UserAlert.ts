@@ -1,15 +1,16 @@
 import {Schema,model,Document,Model,ObjectId,Types} from "mongoose"
 import {TestnetTokenPairs, TestnetTokenPairsKey, TokenPair} from '../folks-finance-js-sdk/src'
-import { User } from "./User"
 
 export interface UserAlert extends Document{
-    user:any,
+    accountAddr:string,
+    email:string,
     escrowAddr:string,
     tokenPairIndex:number,
     dateCreated:Date,
     reminderHealthRatio:string,
     executed:boolean,
     dateExecetued:Date,
+    transactionId:string
 }
 
 
@@ -17,9 +18,12 @@ interface UserAlertModel extends Model<UserAlert>{
 }
 
 const UserAlertSchema= new Schema<UserAlert>({
-    user:{
-        type:Types.ObjectId,
-        ref:"User",
+    accountAddr:{
+        type:String,
+        required:true
+    },
+    email:{
+        type:String,
         required:true
     },
     escrowAddr:{
@@ -46,7 +50,11 @@ const UserAlertSchema= new Schema<UserAlert>({
     dateExecetued:{
         type:Date,
         required:false
-    }
+    },
+    transactionId:{
+        type:String,
+        required:true
+    },
 })
 
 

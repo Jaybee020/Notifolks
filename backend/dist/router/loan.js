@@ -24,9 +24,8 @@ const repay_1 = require("../helpers/repay");
 const getAllLoanInfo_1 = require("../helpers/getAllLoanInfo");
 const utils_1 = require("../src/v1/utils");
 const config_2 = require("../config");
-const mongoose_1 = require("mongoose");
-const authenticate_1 = require("../middleware/authenticate");
-const crypto_js_1 = require("crypto-js");
+const sendtxn_1 = require("../helpers/sendtxn");
+const findtxn_1 = require("../helpers/findtxn");
 const router = express_1.default.Router();
 router.get("", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("Reached Here");
@@ -51,23 +50,15 @@ router.get("/getloan/:accountAddr", function (req, res) {
     });
 });
 //get Alerts by account address
-router.get("/loanAlert/userId/:userId", function (req, res) {
+router.get("/loanAlert/accountAddr/accountAddr", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userId = req.params.userId;
-            const loanInfos = yield UserAlert_1.UserAlertModel.find({ user: new mongoose_1.Types.ObjectId(userId) }).populate("User");
+            const accountAddr = req.params.accountAddr;
+            const loanInfos = yield UserAlert_1.UserAlertModel.find({ accountAddr: accountAddr });
             if (loanInfos) {
                 res.status(200).send({
                     status: true,
-                    message: loanInfos.map((loanInfo) => {
-                        return {
-                            executed: loanInfo.executed,
-                            user: loanInfo.user,
-                            escrowAddr: loanInfo.escrowAddr,
-                            reminderHealthRatio: loanInfo.reminderHealthRatio,
-                            tokenPairKeys: app_1.tokenPairKeys[loanInfo.tokenPairIndex]
-                        };
-                    })
+                    message: loanInfos
                 });
             }
             else {
@@ -82,50 +73,12 @@ router.get("/loanAlert/userId/:userId", function (req, res) {
         }
     });
 });
-//get Alerts by token
-router.get("/loanAlert/tokenPairIndex/:tokenPairIndex", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const tokenPairIndex = req.params.tokenPairIndex;
-            if (!tokenPairIndex) {
-                return res.status(400).send({
-                    status: false,
-                    message: "Invalid account Address given",
-                });
-            }
-            const loanInfos = yield UserAlert_1.UserAlertModel.find({ tokenPairIndex: parseInt(tokenPairIndex) }).populate("User");
-            if (loanInfos) {
-                res.status(200).send({
-                    status: true,
-                    message: loanInfos.map((loanInfo) => {
-                        return {
-                            executed: loanInfo.executed,
-                            user: loanInfo.user,
-                            escrowAddr: loanInfo.escrowAddr,
-                            reminderHealthRatio: loanInfo.reminderHealthRatio,
-                            tokenPairKeys: app_1.tokenPairKeys[loanInfo.tokenPairIndex]
-                        };
-                    })
-                });
-            }
-            else {
-                res.status(400).send({
-                    status: false,
-                    message: "Alert for specified index does not exist"
-                });
-            }
-        }
-        catch (error) {
-            console.error(error);
-        }
-    });
-});
 // creates a new alert document with escrow
-router.post("/createloanAlert", authenticate_1.authenticatetoken, function (req, res) {
+router.post("/createloanAlertTransaction", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { escrowAddr, tokenPairIndex, reminderHealthRatio, password } = req.body;
-            if (!escrowAddr || !tokenPairIndex || !password) {
+            const { escrowAddr, tokenPairIndex, reminderHealthRatio, accountAddr } = req.body;
+            if (!escrowAddr || !tokenPairIndex || reminderHealthRatio) {
                 return res.status(400).send({
                     status: false,
                     message: "Please provide the required fields",
@@ -144,47 +97,13 @@ router.post("/createloanAlert", authenticate_1.authenticatetoken, function (req,
                     message: "Could not find loan"
                 });
             }
-            if (req.user) {
-                req.user.checkPassword(password, function (err, isMatch) {
-                    var _a, _b, _c;
-                    return __awaiter(this, void 0, void 0, function* () {
-                        if (!isMatch) {
-                            return res.status(401).json({
-                                message: "Username and password do not match"
-                            });
-                        }
-                        const accountAddr = String((_a = req.user) === null || _a === void 0 ? void 0 : _a.accountAddr);
-                        const userId = new mongoose_1.Types.ObjectId((_b = req.user) === null || _b === void 0 ? void 0 : _b._id);
-                        const bytes = crypto_js_1.AES.decrypt(String((_c = req.user) === null || _c === void 0 ? void 0 : _c.mnemonic_phrase), password);
-                        var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-                        const sender = (0, algosdk_1.mnemonicToSecretKey)(originalmnemonic);
-                        //Transaction for creating loanAlert
-                        try {
-                            const params = yield config_2.algodClient.getTransactionParams().do();
-                            const loanCreateTxn = (0, utils_1.transferAlgoOrAsset)(79413584, accountAddr, config_1.Address, 1e5, params);
-                            const signedTxn = loanCreateTxn.signTxn(sender.sk);
-                            const txId = (yield config_2.algodClient.sendRawTransaction(signedTxn).do()).txId;
-                            yield (0, algosdk_1.waitForConfirmation)(config_2.algodClient, txId, 1000);
-                        }
-                        catch (error) {
-                            return res.status(400).send({
-                                status: false,
-                                message: "Error in transaction occured"
-                            });
-                        }
-                        yield UserAlert_1.UserAlertModel.create({
-                            user: userId,
-                            escrowAddr: escrowAddr,
-                            reminderHealthRatio: reminderHealthRatio,
-                            tokenPairIndex: parseInt(tokenPairIndex)
-                        });
-                        res.status(200).send({
-                            status: true,
-                            message: "Successful Creation of Alert"
-                        });
-                    });
-                });
-            }
+            //Transaction for creating loanAlert
+            const params = yield config_2.algodClient.getTransactionParams().do();
+            const loanCreateTxn = (0, utils_1.transferAlgoOrAsset)(79413584, accountAddr, config_1.Address, 1e5, params);
+            res.status(200).send({
+                status: true,
+                data: loanCreateTxn
+            });
         }
         catch (error) {
             console.error(error);
@@ -195,37 +114,54 @@ router.post("/createloanAlert", authenticate_1.authenticatetoken, function (req,
         }
     });
 });
-router.post('/newLoan', authenticate_1.authenticatetoken, function (req, res) {
+router.post("/createloanAlert", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { txId, email, accountAddr, escrowAddr, reminderHealthRatio, tokenPairIndex } = req.body;
+        const foundAlert = yield UserAlert_1.UserAlertModel.findOne({
+            transactionId: txId
+        });
+        if (foundAlert) {
+            return res.status(200).send({
+                status: true,
+                message: "Transaaction Id has been used to create alert"
+            });
+        }
+        let txIdExist = yield (0, findtxn_1.findReceiptTxn)(accountAddr, txId);
+        if (!txIdExist) {
+            return res.status(400).send({
+                message: "Couldn't find receipt transaction"
+            });
+        }
+        yield UserAlert_1.UserAlertModel.create({
+            accountAddr: accountAddr,
+            email: email,
+            escrowAddr: escrowAddr,
+            reminderHealthRatio: reminderHealthRatio,
+            transactionId: txId,
+            tokenPairIndex: parseInt(tokenPairIndex)
+        });
+        return res.status(200).send({
+            status: true,
+            message: "Successful Creation of Alert"
+        });
+    });
+});
+router.post('/newLoan', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { collateralAmount, borrowAmount, tokenPairIndex, password } = req.body;
-            if (!collateralAmount || !borrowAmount || tokenPairIndex || !password) {
+            const { collateralAmount, borrowAmount, tokenPairIndex, password, accountAddr } = req.body;
+            if (!collateralAmount || !borrowAmount || tokenPairIndex || !password || accountAddr) {
                 return res.status(400).send({
                     status: false,
                     message: "Please provide the required fields",
                 });
             }
-            if (req.user) {
-                req.user.checkPassword(password, function (err, isMatch) {
-                    var _a, _b;
-                    return __awaiter(this, void 0, void 0, function* () {
-                        if (!isMatch) {
-                            return res.status(401).json({
-                                message: "Username and password do not match"
-                            });
-                        }
-                        const accountAddr = (_a = req.user) === null || _a === void 0 ? void 0 : _a.accountAddr;
-                        const bytes = crypto_js_1.AES.decrypt(String((_b = req.user) === null || _b === void 0 ? void 0 : _b.mnemonic_phrase), password);
-                        var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-                        const key = app_1.tokenPairKeys[parseInt(tokenPairIndex)];
-                        const escrow = yield (0, takeLoan_1.takeLoan)(String(accountAddr), parseInt(collateralAmount), parseInt(borrowAmount), key, originalmnemonic);
-                        return res.status(200).send({
-                            status: true,
-                            escrowAddr: escrow
-                        });
-                    });
-                });
-            }
+            const key = app_1.tokenPairKeys[parseInt(tokenPairIndex)];
+            const data = yield (0, takeLoan_1.takeLoan)(String(accountAddr), parseInt(collateralAmount), parseInt(borrowAmount), key);
+            return res.status(200).send({
+                status: true,
+                data: data
+            });
         }
         catch (error) {
             console.error(error);
@@ -258,7 +194,6 @@ router.get("/currentLoanInfo/:escrowAddr/:tokenPairIndex", function (req, res) {
             console.log(Date.now());
             const loanInfo = yield (0, getCurrentLoanInfo_1.getCurrentLoanInfo)(escrowAddr, tokenPairKey);
             console.log(Date.now());
-            console.log("ReachedHere");
             return res.status(200).send({
                 status: true,
                 message: {
@@ -280,9 +215,9 @@ router.get("/currentLoanInfo/:escrowAddr/:tokenPairIndex", function (req, res) {
         }
     });
 });
-router.post("/repayLoan", authenticate_1.authenticatetoken, function (req, res) {
+router.post("/repayLoanTxn", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { escrowAddr, repayAmount, tokenPairIndex, password } = req.body;
+        let { escrowAddr, repayAmount, tokenPairIndex, accountAddr } = req.body;
         tokenPairIndex = parseInt(tokenPairIndex);
         if (!escrowAddr || !String(tokenPairIndex)) {
             return res.status(400).send({
@@ -296,32 +231,15 @@ router.post("/repayLoan", authenticate_1.authenticatetoken, function (req, res) 
                 message: "Invalid account Address given",
             });
         }
-        let tokenPairKey = app_1.tokenPairKeys[tokenPairIndex];
         try {
             // repay loan
-            if (req.user) {
-                req.user.checkPassword(password, function (err, isMatch) {
-                    var _a, _b;
-                    return __awaiter(this, void 0, void 0, function* () {
-                        if (!isMatch) {
-                            return res.status(401).json({
-                                message: "Username and password do not match"
-                            });
-                        }
-                        //decrypt to get key
-                        const accountAddr = (_a = req.user) === null || _a === void 0 ? void 0 : _a.accountAddr;
-                        const bytes = crypto_js_1.AES.decrypt(String((_b = req.user) === null || _b === void 0 ? void 0 : _b.mnemonic_phrase), password);
-                        var originalmnemonic = bytes.toString(CryptoJS.enc.Utf8);
-                        const key = app_1.tokenPairKeys[parseInt(tokenPairIndex)];
-                        const repay_status = yield (0, repay_1.repayLoan)(escrowAddr, repayAmount, tokenPairKey, originalmnemonic);
-                        console.log("ReachedHere2");
-                        if (repay_status) {
-                            return res.status(200).send({
-                                status: true,
-                                message: "Loan repayed"
-                            });
-                        }
-                    });
+            const key = app_1.tokenPairKeys[parseInt(tokenPairIndex)];
+            const repaytxn = yield (0, repay_1.repayLoan)(escrowAddr, repayAmount, key, accountAddr);
+            console.log("ReachedHere2");
+            if (repaytxn) {
+                return res.status(200).send({
+                    status: true,
+                    data: repaytxn,
                 });
             }
         }
@@ -331,6 +249,15 @@ router.post("/repayLoan", authenticate_1.authenticatetoken, function (req, res) 
                 message: "Could not repay loan "
             });
         }
+    });
+});
+router.post("/processtxn", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let { txns } = req.body;
+        let txId = yield (0, sendtxn_1.sendtxn)(txns);
+        return res.status(200).send({
+            txid: txId
+        });
     });
 });
 exports.folksFinanceRouter = router;

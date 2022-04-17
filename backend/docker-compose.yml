@@ -12,10 +12,10 @@ services:
       - redis
     environment:
       MONGO_CONNECTION_STRING: mongodb://db:27017/Notifications
-      API_KEY: 'YOUR API KEY'
+      API_KEY: Xy8NsXxfJg2cQ2YQ4pax6aLrTcj55jZ9mbsNCM30 
       REDIS_URL: redis://redis
-      APP_EMAIL: 'your email'
-      APP_EMAIL_PASS: 'your email password'
+      APP_EMAIL: gaykinrele002@gmail.com
+      APP_EMAIL_PASS: yejtzcienrovrfdg
 
   db:
     container_name: db

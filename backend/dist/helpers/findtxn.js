@@ -9,19 +9,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.repayLoan = void 0;
-const src_1 = require("../src");
+exports.findReceiptTxn = void 0;
 const config_1 = require("../config");
-function repayLoan(escrowAddr, repayAmount, tokenPairKey, senderAddr) {
+function findReceiptTxn(address, txId) {
     return __awaiter(this, void 0, void 0, function* () {
-        let txns;
-        const tokenPair = src_1.TestnetTokenPairs[tokenPairKey];
-        const reserveAddress = src_1.TestnetReserveAddress;
-        // retrieve params
-        const params = yield config_1.algodClient.getTransactionParams().do();
-        // repay
-        txns = (0, src_1.prepareRepayTransactions)(tokenPair, senderAddr, escrowAddr, reserveAddress, repayAmount, params);
-        return txns;
+        try {
+            let response = yield config_1.indexerClient.searchForTransactions()
+                .address(address)
+                .txid(txId).do();
+            let transacation = response['transactions'][0];
+            if (transacation['asset-transfer-transaction']['receiver'] == config_1.Address && transacation['asset-transfer-transaction']['asset-id'] == 79413584) {
+                return transacation.id;
+            }
+            else {
+                return null;
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
     });
 }
-exports.repayLoan = repayLoan;
+exports.findReceiptTxn = findReceiptTxn;
+// findTxn("QYEZ6NCSPFSU53WWEOROREHFBYP42FBSUSJ5ZEM3R2R5VPNUSNKDHG5JSY","P2Y6UNGMLVREYZXPO2PYBXUJOEX6HMUO5N5KG4A46BUEZ6KB2SPA")
