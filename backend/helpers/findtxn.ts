@@ -7,7 +7,7 @@ export async function findReceiptTxn(address:string,txId:string){
         .txid(txId).do();
         let transacation=response['transactions'][0]
         if(transacation['asset-transfer-transaction']['receiver']==Address &&transacation['asset-transfer-transaction']['asset-id']==79413584){
-        return transacation.id}
+        return transacation.sender}
         else{
             return null
         }

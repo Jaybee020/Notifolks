@@ -43,61 +43,9 @@ Open your local browser and verify the server is running with `http://localhost:
 
 
 ## API Reference
-
-#### Create a new user 
-
-```http
-POST /register
-```
-All parameters are to be in req.body.The password is used to encrypt your secret key and the password is then required to sign future transactions
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `accountAddr` | `string` | **Required**. Account address of new user |
-| `email` | `string` | **Required**. Email of new user |
-| `password` | `string` | **Required**. Password of new user |
-| `mnemonic` | `string` | **Required**. Mnemonic phrase of account of new user |
-
-response.body
-```bash
-    {message:"Your account was succesfully created"}
-```
-
-#### Log in existing user
-```http
-POST /login
-```
-All parameters are to be in req.body
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `accountAddr` | `string` | **Required**. Account address of existing user |
-| `password` | `string` | **Required**. Password of existing user |
-
-response.body
-```bash
-{message:"Successful Login",token:token}
-```
-#### get authenticated user details
-```http
-GET /user/auth
-```
-response.body
-```bash
-   userData: {username: req.user?.accountAddr,
-   email: req.user?.email,}
-```
-
-#### Logout existing user
-```http
-POST /logout
-```
-response.body
-```bash
-   { message: "Logging out user" }
-```
-
 ### Get all loans of specified account address on folks finance
 ```http
-GET /folks/getLoan/:accountAddr
+GET /folks/getloan/:accountAddr
 ```
 All parameters are to be in URL
 | Parameter | Type     | Description                |
@@ -112,14 +60,14 @@ response.body
 ```
 
 
-### Search for loan alerts by userId
+### Search for loan alerts by account address
 ```http
-GET folks/loanAlert/userId/:userId
+GET folks/loanAlert/accountAddr/:accountAddr
 ```
 All parameters are to be in URL
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `userId` | `string` | **Required**. userId to get loan alerts of|
+| `accountAddr` | `string` | **Required**. account address to get loan alerts of|
 
 response.body
 ```bash
@@ -132,46 +80,9 @@ response.body
 }
 ```
 
-
-### Search for loan alerts by tokenpairindex
+#### Helps user take a loan
 ```http
-GET folks/loanAlert/tokenPairIndex/:tokenPairIndex"
-```
-All parameters are to be in URL
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `tokenPairIndex` | `string` | **Required**. token pair index to get loans of|
-
-response.body
-```bash
-{   
-    executed:boolean,
-    user:ObjectId,
-    escrowAddr:string,
-    reminderHealthRatio:string,
-    tokenPairKeys:string
-}
-```
-
-
-### Delete an alert from logged in user alerts
-```http
-DELETE /folks/alert/:escrow
-```
-All parameters are to be in URL
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `username` | `string` | **Required**. username of existing user to delete from friends|
-
-response.body
-```bash
-{message:"Successfully removed"+username+"from your friends"}
-```
-
-
-#### Helps loggged in user take a loan
-```http
-POST /folks/createloan
+POST /folks/newLoanTxn
 ```
 All parameters are to be in req.body.The password is used to authenicate transactions
 | Parameter | Type     | Description                |
@@ -179,31 +90,50 @@ All parameters are to be in req.body.The password is used to authenicate transac
 | `collateralAmount` | `string` | **Required**. collateral amount to be used to take loan|
 | `borrowAmount` | `string` | **Required**. borrow amount to take for loan |
 | `tokenPairIndex` | `string` | **Required**. required token pair index to be used for loan |
-| `password` | `string` | **Required**. password of logged in user|
+| `accountAddr` | `string` | **Required**. address of user wallet|
 response.body
 ```bash
 {   status:true,
-    escrowAddr:string
+    data:Object
     }
 ```
 
-,,,
 
-#### Create a new Loan alert with loggged in user
+#### Create a new loan alert transaction
 ```http
-POST /folks/createloanAlert
+POST /folks/createloanAlertTransaction
 ```
-All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.The password is used to authenicate transactions
+All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
-| `tokenPairKeyIndex` | `string` | **Required**. Address of escrow account used for loan |
-| `reminderHealthRatio` | `string` | **Required**. Address of escrow account used for loan |
-| `password` | `string` | **Required**. Address of escrow account used for loan |
+| `tokenPairKeyIndex` | `string` | **Required**. token pair index to loan to be taken |
+| `accountAddr` | `string` | **Required**. Address of user for loan |
+This returns a transaction to be signed by the client
 response.body
 ```bash
 {   status:true,
-    message:"Successful Creation of Alert"}
+    message:Transaction[]
+```
+
+
+#### Create a new loan alert with for user
+```http
+POST /folks/createloanAlert
+```
+All parameters are to be in req.body.A transaction id is to be shown as a receipt.
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
+| `txId` | `string` | **Required**. Transaction Id to be used as a receipt |
+| `email` | `string` | **Required**. Email for notification alert to be sent to|
+  `reminderHealthRatio` | `string` | **Required**. reminder health ratio to be set|
+| `tokenPairKeyIndex` | `string` | **Required**. Token pair index of loan to be taken|
+| `accountAddr` | `string` | **Required**. Address of user for loan |
+response.body
+```bash
+{   status:true,
+    message:"Successful Creation of loan Alert"
 ```
 
 #### Get loan info of specified escrowAddress and tokenPair
@@ -232,21 +162,38 @@ response.body
 
 escrowAddr,repayAmount,tokenPairKeyIndex
 
-#### Create a new Loan alert with loggged in user
+#### Prepares a new repayment of loan txn  of user 
 ```http
 POST /folks/repayLoan
 ```
-All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.The password is used to authenicate transactions
+All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.The password is used to authenicate transactions.
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
 | `tokenPairKeyIndex` | `string` | **Required**. token pair index used for loan |
-| `password` | `string` | **Required**. password used to authenticate transactions |
+| `repayAmount` | `string` | **Required**. amount to be repayed|
+| `acoountAddr` | `string` | **Required**. account Address of the borrower |
+This returns a transaction to be signed by the client
 response.body
 ```bash
 {   status:true,
-    message:"Loan repayed"}
+    data:Transaction
+}
 ```
+
+#### Sends a signed traansaction to the blockchain 
+```http
+POST /folks/createloanAlertTransaction
+```
+All parameters are to be in req.body.A transfer of 0.1 algos is made to create a new loan alert.
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `txn` | `signedTx|signedTx[]` | **Required**. signed transaction or array of signed transactions |
+response.body
+```bash
+{   txId:string  }
+```
+
 
 ## Demo
 Working link at 

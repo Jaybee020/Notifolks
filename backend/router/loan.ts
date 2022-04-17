@@ -61,14 +61,14 @@ router.get("/loanAlert/accountAddr/accountAddr",async function (req:Request,res:
 // creates a new alert document with escrow
 router.post("/createloanAlertTransaction",async function (req:Request,res:Response) {
     try {
-        const {escrowAddr,tokenPairIndex,reminderHealthRatio,accountAddr}=req.body
-        if ( !escrowAddr || !tokenPairIndex  ||reminderHealthRatio){
+        const {escrowAddr,tokenPairIndex,accountAddr}=req.body
+        if ( !escrowAddr || !tokenPairIndex  ||accountAddr){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
              });
         }   //Check whether all the fields are passed
-        if(!isValidAddress(escrowAddr)){
+        if(!isValidAddress(escrowAddr) || !isValidAddress(accountAddr)){
             return res.status(400).send({
                 status:false,
                 message:"Invalid account Address given",
@@ -107,10 +107,15 @@ router.post("/createloanAlert",async function(req:Request,res:Response){
             message:"Transaaction Id has been used to create alert"
         })
     }
-    let txIdExist=await findReceiptTxn(accountAddr,txId)
-    if(!txIdExist){
+    let txIdSender=await findReceiptTxn(accountAddr,txId)
+    if(!txIdSender){
         return res.status(400).send({
             message:"Couldn't find receipt transaction"
+        })
+    }
+    if(txIdSender!=accountAddr){
+        return res.status(400).send({
+            message:"Sender address and transaction Id do not match"
         })
     }
     await UserAlertModel.create({
@@ -127,10 +132,10 @@ router.post("/createloanAlert",async function(req:Request,res:Response){
 
 })
 
-router.post('/newLoan',async function (req:Request,res:Response) {
+router.post('/newLoanTxn',async function (req:Request,res:Response) {
     try {
-        const {collateralAmount,borrowAmount,tokenPairIndex,password,accountAddr}=req.body
-        if (!collateralAmount || !borrowAmount ||tokenPairIndex || !password||accountAddr){
+        const {collateralAmount,borrowAmount,tokenPairIndex,accountAddr}=req.body
+        if (!collateralAmount || !borrowAmount ||tokenPairIndex ||accountAddr){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
