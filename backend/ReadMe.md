@@ -72,11 +72,8 @@ All parameters are to be in URL
 response.body
 ```bash
 {   
-    executed:boolean,
-    user:ObjectId,
-    escrowAddr:string,
-    reminderHealthRatio:string,
-    tokenPairKeys:string
+    status:true,
+    loaninfo,LoanInfo[]
 }
 ```
 
@@ -91,6 +88,8 @@ All parameters are to be in req.body.The password is used to authenicate transac
 | `borrowAmount` | `string` | **Required**. borrow amount to take for loan |
 | `tokenPairIndex` | `string` | **Required**. required token pair index to be used for loan |
 | `accountAddr` | `string` | **Required**. address of user wallet|
+
+This returns an object that contains the escrow address for the loan and transactions signed by the escrow,escrow initiation transactions to be signed by the user and borrow transactions.Signed escrow initialziation transactions are to be kept in a list(usertx_0,signed_escrow_tx,usertx_1) and sent to the chain before borrow transactions are sent.
 response.body
 ```bash
 {   status:true,
@@ -109,6 +108,7 @@ All parameters are to be in req.body.A transfer of 0.01 algos is made to create 
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
 | `tokenPairKeyIndex` | `string` | **Required**. token pair index to loan to be taken |
 | `accountAddr` | `string` | **Required**. Address of user for loan |
+
 This returns a transaction to be signed by the client
 response.body
 ```bash
@@ -130,6 +130,7 @@ All parameters are to be in req.body.A transaction id is to be shown as a receip
   `reminderHealthRatio` | `string` | **Required**. reminder health ratio to be set|
 | `tokenPairKeyIndex` | `string` | **Required**. Token pair index of loan to be taken|
 | `accountAddr` | `string` | **Required**. Address of user for loan |
+
 response.body
 ```bash
 {   status:true,
@@ -160,8 +161,6 @@ response.body
 ```
 
 
-escrowAddr,repayAmount,tokenPairKeyIndex
-
 #### Prepares a new repayment of loan txn  of user 
 ```http
 POST /folks/repayLoan
@@ -173,6 +172,7 @@ All parameters are to be in req.body.A transfer of 0.01 algos is made to create 
 | `tokenPairKeyIndex` | `string` | **Required**. token pair index used for loan |
 | `repayAmount` | `string` | **Required**. amount to be repayed|
 | `acoountAddr` | `string` | **Required**. account Address of the borrower |
+
 This returns a transaction to be signed by the client
 response.body
 ```bash
