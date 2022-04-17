@@ -90,6 +90,7 @@ All parameters are to be in req.body.The password is used to authenicate transac
 | `accountAddr` | `string` | **Required**. address of user wallet|
 
 This returns an object that contains the escrow address for the loan and transactions signed by the escrow,escrow initiation transactions to be signed by the user and borrow transactions.Signed escrow initialziation transactions are to be kept in a list(usertx_0,signed_escrow_tx,usertx_1) and sent to the chain before borrow transactions are sent.
+
 response.body
 ```bash
 {   status:true,
@@ -110,6 +111,7 @@ All parameters are to be in req.body.A transfer of 0.01 algos is made to create 
 | `accountAddr` | `string` | **Required**. Address of user for loan |
 
 This returns a transaction to be signed by the client
+
 response.body
 ```bash
 {   status:true,
@@ -174,6 +176,7 @@ All parameters are to be in req.body.A transfer of 0.01 algos is made to create 
 | `acoountAddr` | `string` | **Required**. account Address of the borrower |
 
 This returns a transaction to be signed by the client
+
 response.body
 ```bash
 {   status:true,
@@ -189,6 +192,7 @@ All parameters are to be in req.body.A transfer of 0.1 algos is made to create a
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `txn` | `signedTx|signedTx[]` | **Required**. signed transaction or array of signed transactions |
+
 response.body
 ```bash
 {   txId:string  }
@@ -196,7 +200,7 @@ response.body
 
 
 ## Demo
-Working link at 
+Working link at https://notifolks.herokuapp.com
 
 
 
