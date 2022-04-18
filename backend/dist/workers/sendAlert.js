@@ -40,7 +40,7 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
             const allAlerts = yield UserAlert_1.UserAlertModel.find({
                 executed: false
             }); //get all Alerts that have not been executed
-            if (allAlerts) {
+            if (allAlerts.length > 0) {
                 console.log("Alert exist");
                 allAlerts.forEach((anAlert) => __awaiter(this, void 0, void 0, function* () {
                     let message, title, recipient;
@@ -66,9 +66,7 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                     }
                 }));
             }
-            else {
-                console.log("No alert");
-            }
+            else { }
             // let message, title, recipient;
             // message = "Welcome"
             // title = "Notification";

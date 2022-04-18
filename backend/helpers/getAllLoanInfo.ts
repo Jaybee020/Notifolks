@@ -7,6 +7,9 @@ interface Info{
     loanEscrow:string,
     loanUser:string,
     tokenPairKey:TestnetTokenPairsKey
+    borrowedAmount:number,
+    collateralBallance:number,
+    borrowedBalance:number
 }
 
 
@@ -18,7 +21,7 @@ export async function getAllLoanInfo(accountAddr:string){
     const oracle = TestnetOracle;
     const AllUserLoan:Info[]=[]
 
-    tokenPairKeys.forEach(async(tokenPairKey)=>{
+    await Promise.all(tokenPairKeys.map(async(tokenPairKey)=>{
         const tokenPair = TestnetTokenPairs[tokenPairKey];
         const reserveAddress = TestnetReserveAddress;
         const { collateralPool, borrowPool } = tokenPair;
@@ -37,17 +40,20 @@ export async function getAllLoanInfo(accountAddr:string){
         let loans = loansInfo.loans;
         let nextToken = loansInfo.nextToken;
         //get Loans specified to User
-        const UserLoan:Info[]=loans.filter((loan)=>{loan.userAddress==accountAddr}).map((loan)=>{
-            return {
-                tokenPairKey:tokenPairKey,
-                loanEscrow:loan.escrowAddress,
-                loanUser:loan.userAddress
-
+        loans.forEach((loan)=>{
+            if(loan.userAddress==accountAddr){
+                AllUserLoan.push({
+                    tokenPairKey:tokenPairKey,
+                    loanEscrow:loan.escrowAddress,
+                    loanUser:loan.userAddress,
+                    borrowedAmount:Number(loan.borrowed),
+                    collateralBallance:Number(loan.collateralBalance),
+                    borrowedBalance:Number(loan.borrowBalance)
+                })
             }
+        
+        
         })
-        let i=0
-        AllUserLoan.push(...UserLoan)//push to overall Array
-        console.log("Reached Here"+i.toString())
 
         while (nextToken !== undefined) {
             // sleep for 0.1 seconds to prevent hitting request limit
@@ -56,22 +62,22 @@ export async function getAllLoanInfo(accountAddr:string){
             loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate, nextToken);
             loans = loansInfo.loans;
             nextToken = loansInfo.nextToken;
-            const UserLoan:Info[]=loans.filter((loan)=>{loan.userAddress==accountAddr}).map((loan)=>{
-                return {
-                    tokenPairKey:tokenPairKey,
-                    loanEscrow:loan.escrowAddress,
-                    loanUser:loan.userAddress
-    
+            loans.forEach((loan)=>{
+                if(loan.userAddress==accountAddr){
+                    AllUserLoan.push({
+                        tokenPairKey:tokenPairKey,
+                        loanEscrow:loan.escrowAddress,
+                        loanUser:loan.userAddress,
+                        borrowedAmount:Number(loan.borrowed),
+                        collateralBallance:Number(loan.collateralBalance),
+                        borrowedBalance:Number(loan.borrowBalance)
+                    })
                 }
+            
+            
             })
-            AllUserLoan.push(...UserLoan)
-            console.log("Reached Here"+i.toString())
-            i++
-
     }
-        
-    })
-
-    AllUserLoan.forEach((aUserLoan)=>console.log(aUserLoan.loanUser))
+    }))
     return AllUserLoan
+
 }

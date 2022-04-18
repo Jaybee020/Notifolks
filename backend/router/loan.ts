@@ -175,9 +175,7 @@ router.get("/currentLoanInfo/:escrowAddr/:tokenPairIndex",async function (req:Re
     }
     let tokenPairKey=tokenPairKeys[tokenPairIndex]
     try {
-        console.log(Date.now())
         const loanInfo=await getCurrentLoanInfo(escrowAddr,tokenPairKey)
-        console.log(Date.now())
         return res.status(200).send({
             status:true,
             message:{

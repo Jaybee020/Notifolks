@@ -32,7 +32,7 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
         const allAlerts=await UserAlertModel.find({
             executed:false
         })//get all Alerts that have not been executed
-        if(allAlerts){
+        if(allAlerts.length>0){
             console.log("Alert exist")
             allAlerts.forEach(async(anAlert)=>{
                 let message, title, recipient;
@@ -61,7 +61,7 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                     console.log("Reached here 4")
                 }
             })
-        }else{console.log("No alert")}
+        }else{}
         // let message, title, recipient;
         // message = "Welcome"
         // title = "Notification";
