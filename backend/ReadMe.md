@@ -43,14 +43,15 @@ Open your local browser and verify the server is running with `http://localhost:
 
 
 ## API Reference
-### Get all loans of specified account address on folks finance
+### Get all loans of specified account address and specified tokenpairindex on folks finance
 ```http
-GET /folks/getloan/:accountAddr
+GET /folks/getloan/:accountAddr/:tokenPairIndes
 ```
 All parameters are to be in URL
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `accountAddr` | `string` | **Required**. address of account we want to get loans of. |
+| `tokenPairIndex` | `string` | **Required**. required token pair index to retrieve loans info of |
 
 response.body
 ```bash
@@ -86,7 +87,7 @@ All parameters are to be in req.body.The password is used to authenicate transac
 | :-------- | :------- | :------------------------- |
 | `collateralAmount` | `string` | **Required**. collateral amount to be used to take loan|
 | `borrowAmount` | `string` | **Required**. borrow amount to take for loan |
-| `tokenPairIndex` | `string` | **Required**. required token pair index to be used for loan |
+| `tokenPairIndex` | `string` | **Required**. required token pair indexto be used for loan |
 | `accountAddr` | `string` | **Required**. address of user wallet|
 
 This returns an object that contains the escrow address for the loan and transactions signed by the escrow,escrow initiation transactions to be signed by the user and borrow transactions.Signed escrow initialziation transactions are to be kept in a list(usertx_0,signed_escrow_tx,usertx_1) and sent to the chain before borrow transactions are sent.

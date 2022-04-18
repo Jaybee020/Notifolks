@@ -23,7 +23,6 @@ alertsQueue.process(async function(job,done){
         done(new Error("Error sending alert"));
     }
     done();
-    console.log("Reached here 2")
 })
 
 
