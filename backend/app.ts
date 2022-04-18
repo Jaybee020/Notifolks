@@ -11,7 +11,6 @@ import { sendAlert } from "./workers/sendAlert"
 export const tokenPairKeys:TestnetTokenPairsKey[]=["ALGO-USDC" , "ALGO-USDt" , "ALGO-goBTC" , "ALGO-goETH" , "ALGO-xUSD" , "USDC-ALGO" , "USDC-USDt" , "USDC-goBTC" , "USDC-goETH" , "USDC-xUSD" , "USDt-ALGO" , "USDt-USDC" , "USDt-goBTC" , "USDt-goETH" , "USDt-xUSD" , "goBTC-ALGO" , "goBTC-USDC" , "goBTC-USDt" ,"goBTC-goETH", "goBTC-xUSD" , "goETH-ALGO", "goETH-USDC", "goETH-USDt", "goETH-goBTC" , "goETH-xUSD" , "xUSD-ALGO" ,"xUSD-USDC", "xUSD-USDt", "xUSD-goBTC", "xUSD-goETH"]
 dotenv.config()
 const uri = String(process.env.MONGO_CONNECTION_STRING)
-console.log(uri)
 const PORT:number=parseInt(process.env.PORT as string) || 8000
 mongoose.connect(uri,{})
                 .then(()=>{console.log('Connected to the database')})

@@ -31,14 +31,25 @@ router.get("", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("Reached Here");
 }));
 //gets Loan of Specified User
-router.get("/getloan/:accountAddr", function (req, res) {
+router.get("/getloan/:accountAddr/:tokenPairIndex", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const accountAddr = req.params.accountAddr;
-            const AllLoanInfo = yield (0, getAllLoanInfo_1.getAllLoanInfo)(accountAddr);
+            if (!(0, algosdk_1.isValidAddress)(accountAddr)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "Address is not valid"
+                });
+            }
+            const tokenPairIndex = parseInt(req.params.tokenPairIndex);
+            const AllLoanInfo = yield (0, getAllLoanInfo_1.getAllLoanInfo)(accountAddr, app_1.tokenPairKeys[tokenPairIndex]);
+            const foundUserLoanAlert = yield UserAlert_1.UserAlertModel.find({ accountAddr: accountAddr, tokenPairIndex: tokenPairIndex });
+            const data = AllLoanInfo.map((info) => {
+                return Object.assign(Object.assign({}, info), { alertStatus: foundUserLoanAlert.map((info) => info.escrowAddr).includes(info.loanEscrow) });
+            });
             return res.status(200).send({
                 status: true,
-                message: AllLoanInfo
+                message: data
             });
         }
         catch (error) {

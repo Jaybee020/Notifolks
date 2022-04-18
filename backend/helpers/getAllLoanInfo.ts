@@ -5,25 +5,17 @@ import { TestnetPoolsKey,getLoanInfo , TestnetTokenPairsKey,TestnetTokenPairs,Te
 
 interface Info{
     loanEscrow:string,
-    loanUser:string,
-    tokenPairKey:TestnetTokenPairsKey
     borrowedAmount:number,
-    collateralBallance:number,
+    collateralBalance:number,
     borrowedBalance:number
 }
 
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-export async function getAllLoanInfo(accountAddr:string){
+export async function getAllLoanInfo(accountAddr:string,tokenPairKey:TestnetTokenPairsKey){
     const oracle = TestnetOracle;
     const AllUserLoan:Info[]=[]
 
-    await Promise.all(tokenPairKeys.map(async(tokenPairKey)=>{
-        const tokenPair = TestnetTokenPairs[tokenPairKey];
-        const reserveAddress = TestnetReserveAddress;
+    const tokenPair = TestnetTokenPairs[tokenPairKey];
         const { collateralPool, borrowPool } = tokenPair;
 
          // get conversion rate
@@ -43,11 +35,9 @@ export async function getAllLoanInfo(accountAddr:string){
         loans.forEach((loan)=>{
             if(loan.userAddress==accountAddr){
                 AllUserLoan.push({
-                    tokenPairKey:tokenPairKey,
                     loanEscrow:loan.escrowAddress,
-                    loanUser:loan.userAddress,
                     borrowedAmount:Number(loan.borrowed),
-                    collateralBallance:Number(loan.collateralBalance),
+                    collateralBalance:Number(loan.collateralBalance),
                     borrowedBalance:Number(loan.borrowBalance)
                 })
             }
@@ -56,8 +46,6 @@ export async function getAllLoanInfo(accountAddr:string){
         })
 
         while (nextToken !== undefined) {
-            // sleep for 0.1 seconds to prevent hitting request limit
-            await sleep(100);
             // next loop of escrows
             loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate, nextToken);
             loans = loansInfo.loans;
@@ -65,11 +53,9 @@ export async function getAllLoanInfo(accountAddr:string){
             loans.forEach((loan)=>{
                 if(loan.userAddress==accountAddr){
                     AllUserLoan.push({
-                        tokenPairKey:tokenPairKey,
                         loanEscrow:loan.escrowAddress,
-                        loanUser:loan.userAddress,
                         borrowedAmount:Number(loan.borrowed),
-                        collateralBallance:Number(loan.collateralBalance),
+                        collateralBalance:Number(loan.collateralBalance),
                         borrowedBalance:Number(loan.borrowBalance)
                     })
                 }
@@ -77,7 +63,6 @@ export async function getAllLoanInfo(accountAddr:string){
             
             })
     }
-    }))
     return AllUserLoan
 
 }

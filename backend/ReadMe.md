@@ -1,5 +1,5 @@
 
-# NotiFolks
+# NotiFolks Backend
 
 This is the REST API of NotifFolks ,a platform where users can set alerts for their several loans on the folks finance platform.
 ## Download and Build on local
