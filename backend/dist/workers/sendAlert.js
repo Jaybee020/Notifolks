@@ -26,12 +26,11 @@ alertsQueue.process(function (job, done) {
     return __awaiter(this, void 0, void 0, function* () {
         const { recipient, title, message } = job.data;
         let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, message, title);
-        console.log("reached Here");
+        console.log(`Email successfully sent to ${recipient}`);
         if (sendEmailResponse.error) {
             done(new Error("Error sending alert"));
         }
         done();
-        console.log("Reached here 2");
     });
 });
 exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
@@ -67,17 +66,6 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                 }));
             }
             else { }
-            // let message, title, recipient;
-            // message = "Welcome"
-            // title = "Notification";
-            // recipient = "olayinkaganiyu1@gmail.com";
-            // alertsQueue.add(
-            //     {message,title,recipient},
-            //     {
-            //         attempts:3,
-            //         backoff:3000
-            //     }
-            // )
         }
         catch (error) {
             console.log(error);

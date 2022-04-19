@@ -31,7 +31,6 @@ function sendEmail(email, title, message) {
                     console.log(error);
                 }
                 else {
-                    console.log("Server is ready to take our messages");
                 }
             });
             var body_html = `<html><p>${message}</p></html>`;

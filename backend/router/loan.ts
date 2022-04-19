@@ -231,7 +231,6 @@ router.post("/repayLoanTxn",async function (req:Request,res:Response){
         // repay loan
         const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
         const repaytxn=await repayLoan(escrowAddr,repayAmount,key,accountAddr)
-        console.log("ReachedHere2")
         if(repaytxn){
             return res.status(200).send({
                 status:true,

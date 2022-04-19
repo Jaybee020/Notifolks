@@ -25,7 +25,6 @@ const getCurrentLoanInfo = (escrowAddr, tokenPairKey) => __awaiter(void 0, void 
     const borrowPoolInfo = yield (0, src_1.getPoolInfo)(config_1.indexerClient, borrowPool);
     const tokenPairInfo = yield (0, src_1.getTokenPairInfo)(config_1.indexerClient, tokenPair);
     const loan = yield (0, src_1.getLoanInfo)(config_1.indexerClient, tokenPair, oracle, escrowAddr);
-    console.log(loan);
     return loan;
 });
 exports.getCurrentLoanInfo = getCurrentLoanInfo;

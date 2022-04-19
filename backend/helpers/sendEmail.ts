@@ -16,7 +16,6 @@ export async function sendEmail(email:string,title:string,message:string) {
         if (error) {
             console.log(error);
         } else {
-            console.log("Server is ready to take our messages");
         }
         });
         var body_html = `<html><p>${message}</p></html>`

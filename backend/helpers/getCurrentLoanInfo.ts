@@ -21,6 +21,5 @@ export const getCurrentLoanInfo =async (escrowAddr:string,tokenPairKey:TestnetTo
 
     
     const loan=await getLoanInfo(indexerClient,tokenPair,oracle,escrowAddr)
-    console.log(loan)
     return loan
 }

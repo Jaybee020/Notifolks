@@ -5,7 +5,6 @@ import { getCurrentLoanInfo } from "../helpers/getCurrentLoanInfo"
 import { UserAlertModel } from "../models/UserAlert";
 import { tokenPairKeys } from "../app";
 import { REDIS_URL } from "./config";
-
 const alertsQueue = new Queue("alerts",REDIS_URL)
 
 
@@ -18,7 +17,7 @@ alertsQueue.process(async function(job,done){
         message,
         title
       );
-        console.log("reached Here")
+    console.log(`Email successfully sent to ${recipient}`)
     if (sendEmailResponse.error) {
         done(new Error("Error sending alert"));
     }
@@ -61,17 +60,6 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                 }
             })
         }else{}
-        // let message, title, recipient;
-        // message = "Welcome"
-        // title = "Notification";
-        // recipient = "olayinkaganiyu1@gmail.com";
-        // alertsQueue.add(
-        //     {message,title,recipient},
-        //     {
-        //         attempts:3,
-        //         backoff:3000
-        //     }
-        // )
     } catch (error) {
         console.log(error)
     }
