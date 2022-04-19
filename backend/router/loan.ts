@@ -229,8 +229,9 @@ router.post("/repayLoanTxn",async function (req:Request,res:Response){
     }
     try {
         // repay loan
-        const key=tokenPairKeys[parseInt(tokenPairIndex as string)]
-        const repaytxn=await repayLoan(escrowAddr,repayAmount,key,accountAddr)
+        const key=tokenPairKeys[tokenPairIndex]
+        console.log(key)
+        const repaytxn=await repayLoan(escrowAddr,Number(repayAmount),key,accountAddr)
         if(repaytxn){
             return res.status(200).send({
                 status:true,

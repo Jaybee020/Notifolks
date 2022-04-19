@@ -74,7 +74,7 @@ response.body
 ```bash
 {   
     status:true,
-    loaninfo,LoanInfo[]
+    loaninfo:LoanInfo[]//an array containing serveral loan informations
 }
 ```
 
@@ -131,7 +131,7 @@ All parameters are to be in req.body.A transaction id is to be shown as a receip
 | `txId` | `string` | **Required**. Transaction Id to be used as a receipt |
 | `email` | `string` | **Required**. Email for notification alert to be sent to|
   `reminderHealthRatio` | `string` | **Required**. reminder health ratio to be set|
-| `tokenPairKeyIndex` | `string` | **Required**. Token pair index of loan to be taken|
+| `tokenPairIndex` | `string` | **Required**. Token pair index of loan to be taken|
 | `accountAddr` | `string` | **Required**. Address of user for loan |
 
 response.body
@@ -142,7 +142,7 @@ response.body
 
 #### Get loan info of specified escrowAddress and tokenPair
 ```http
-GET /folks/currentLoanInfo/:escrowAddr/:tokenPairKeyIndex"
+GET /folks/currentLoanInfo/:escrowAddr/:tokenPairIndex"
 ```
 All parameters are to be in URL
 | Parameter | Type     | Description                |
@@ -166,13 +166,13 @@ response.body
 
 #### Prepares a new repayment of loan txn  of user 
 ```http
-POST /folks/repayLoan
+POST /folks/repayLoanTxn
 ```
-All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.The password is used to authenicate transactions.
+All parameters are to be in req.body.A.
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
-| `tokenPairKeyIndex` | `string` | **Required**. token pair index used for loan |
+| `tokenPairIndex` | `string` | **Required**. token pair index used for loan |
 | `repayAmount` | `string` | **Required**. amount to be repayed|
 | `acoountAddr` | `string` | **Required**. account Address of the borrower |
 
