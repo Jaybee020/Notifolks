@@ -1,4 +1,3 @@
-import { Transaction } from "algosdk";
 import {
   prepareAddEscrowTransactions,
   prepareBorrowTransactions,
@@ -7,13 +6,14 @@ import {
   TestnetTokenPairsKey,
 } from "../src";
 import { algodClient } from "../config";
+import { encodeTxn } from "./encodeTxn";
 
 
 interface OutputObj{
   escrowAddr:string,
-  signedEscrowTxn:Uint8Array,
-  unsignedUserTxn:Transaction[],
-  borrowTxns:Transaction[]
+  signedEscrowTxn:number[],
+  unsignedUserTxn:number[][],
+  borrowTxns:number[][]
 
 }
 
@@ -33,11 +33,11 @@ export async function takeLoan(accountAddr:string,collateralAmount:number,borrow
     txns = addEscrowTxns.txns;
     const signedEscrowTxn= txns[1].signTxn(escrow.sk)
      // // borrow
-    txns = prepareBorrowTransactions(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
+    let borrow_txns = prepareBorrowTransactions(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
     return {
       escrowAddr:escrow.addr,
-      signedEscrowTxn:signedEscrowTxn,
-      unsignedUserTxn:[txns[0],txns[2]],
-      borrowTxns:txns
+      signedEscrowTxn:Array.from(signedEscrowTxn),
+      unsignedUserTxn:[encodeTxn(txns[0]),encodeTxn(txns[2])],
+      borrowTxns:borrow_txns.map(encodeTxn)
     }
   }

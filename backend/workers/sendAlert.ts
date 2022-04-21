@@ -10,18 +10,23 @@ const alertsQueue = new Queue("alerts",REDIS_URL)
 
 //Consumer queue process to be performed in background
 alertsQueue.process(async function(job,done){
-    const { recipient, title, message } = job.data;
+    try {
+        const { recipient, title, message } = job.data;
 
-    let sendEmailResponse = await sendEmail(
-        recipient,
-        message,
-        title
-      );
-    console.log(`Email successfully sent to ${recipient}`)
-    if (sendEmailResponse.error) {
-        done(new Error("Error sending alert"));
+        let sendEmailResponse = await sendEmail(
+            recipient,
+            message,
+            title
+          );
+        console.log(`Email successfully sent to ${recipient}`)
+        if (sendEmailResponse.error) {
+            done(new Error("Error sending alert"));
+        }
+        done();
+    } catch (error) {
+        console.error(error)
     }
-    done();
+   
 })
 
 
@@ -37,7 +42,7 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                 console.log(anAlert.email)
                 const loanInfo=await getCurrentLoanInfo(anAlert.escrowAddr,tokenPairKeys[anAlert.tokenPairIndex])
                 console.log(loanInfo)
-                if(loanInfo.healthFactor/BigInt(1e14)<BigInt(anAlert.reminderHealthRatio)){
+                if(Number(loanInfo.healthFactor)/(1e14)<Number(anAlert.reminderHealthRatio)){
                     message = `${tokenPairKeys[anAlert.tokenPairIndex]} has just gone below your reminder health ratio of ${anAlert.reminderHealthRatio}.
                     Current health Ratio is  ${loanInfo.healthFactor}.`;
                     title = `${tokenPairKeys[anAlert.tokenPairIndex]} loan Alert!`;

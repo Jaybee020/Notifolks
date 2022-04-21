@@ -2,7 +2,7 @@ import express ,{ Router,Request,Response }from "express"
 import { getCurrentLoanInfo } from "../helpers/getCurrentLoanInfo"
 import { UserAlertModel } from "../models/UserAlert"
 import { tokenPairKeys } from "../app"
-import {isValidAddress,mnemonicToSecretKey,waitForConfirmation} from "algosdk";
+import algosdk, {isValidAddress,mnemonicToSecretKey,waitForConfirmation} from "algosdk";
 import { takeLoan } from "../helpers/takeLoan";
 import { Address } from "../config";
 import { repayLoan } from "../helpers/repay";
@@ -11,6 +11,7 @@ import { transferAlgoOrAsset } from "../src/v1/utils";
 import { algodClient } from "../config";
 import { sendtxn } from "../helpers/sendtxn";
 import { findReceiptTxn } from "../helpers/findtxn";
+import { encodeTxn } from "../helpers/encodeTxn";
 const router=express.Router()
 
 router.get("",async (req:Request,res:Response) => {
@@ -32,7 +33,11 @@ router.get("/getloan/:accountAddr/:tokenPairIndex",async function (req:Request,r
         const data=AllLoanInfo.map((info)=>{
             return {
                 ...info,
-                alertStatus:foundUserLoanAlert.map((info)=>info.escrowAddr).includes(info.loanEscrow)
+                alertStatus:foundUserLoanAlert.map((info)=>info.escrowAddr).includes(info.loanEscrow),
+                executed:(foundUserLoanAlert.find((loanalert)=>loanalert.escrowAddr==info.loanEscrow))?.executed,
+                dateCreated:(foundUserLoanAlert.find((loanalert)=>loanalert.escrowAddr==info.loanEscrow))?.dateCreated,
+                dateExecuted:(foundUserLoanAlert.find((loanalert)=>loanalert.escrowAddr==info.loanEscrow))?.dateExecetued,
+
             }
 
         })
@@ -77,7 +82,7 @@ router.get("/loanAlert/accountAddr/accountAddr",async function (req:Request,res:
 router.post("/createloanAlertTransaction",async function (req:Request,res:Response) {
     try {
         const {escrowAddr,tokenPairIndex,accountAddr}=req.body
-        if ( !escrowAddr || !tokenPairIndex  ||accountAddr){
+        if ( !escrowAddr || !tokenPairIndex  ||!accountAddr){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
@@ -89,6 +94,7 @@ router.post("/createloanAlertTransaction",async function (req:Request,res:Respon
                 message:"Invalid account Address given",
         })}
         const loanInfo=await getCurrentLoanInfo(escrowAddr,tokenPairKeys[parseInt(tokenPairIndex)])
+        console.log(Number(loanInfo.healthFactor)/(1e14))
         if(!loanInfo){
             return res.status(400).send({
                 status:true,
@@ -100,7 +106,8 @@ router.post("/createloanAlertTransaction",async function (req:Request,res:Respon
         const loanCreateTxn=transferAlgoOrAsset(79413584,accountAddr,Address,1e5,params)
         res.status(200).send({
             status:true,
-            data:loanCreateTxn
+            data: encodeTxn(loanCreateTxn),
+            currentHealthRatio:Number(loanInfo.healthFactor)/(1e14)
         })
     } catch (error) {
         console.error(error)
@@ -150,7 +157,7 @@ router.post("/createloanAlert",async function(req:Request,res:Response){
 router.post('/newLoanTxn',async function (req:Request,res:Response) {
     try {
         const {collateralAmount,borrowAmount,tokenPairIndex,accountAddr}=req.body
-        if (!collateralAmount || !borrowAmount ||tokenPairIndex ||accountAddr){
+        if (!collateralAmount || !borrowAmount || !tokenPairIndex || !accountAddr){
             return res.status(400).send({
                 status: false,
                 message: "Please provide the required fields",
@@ -248,13 +255,6 @@ router.post("/repayLoanTxn",async function (req:Request,res:Response){
 });
 
 
-router.post("/processtxn",async function(req:Request,res:Response){
-    let{txns}=req.body
-    let txId=await sendtxn(txns)
-    return res.status(200).send({
-        txid:txId
-    })
-})
 
 export const folksFinanceRouter=router
 

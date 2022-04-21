@@ -26,6 +26,7 @@ const utils_1 = require("../src/v1/utils");
 const config_2 = require("../config");
 const sendtxn_1 = require("../helpers/sendtxn");
 const findtxn_1 = require("../helpers/findtxn");
+const encodeTxn_1 = require("../helpers/encodeTxn");
 const router = express_1.default.Router();
 router.get("", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("Reached Here");
@@ -45,7 +46,8 @@ router.get("/getloan/:accountAddr/:tokenPairIndex", function (req, res) {
             const AllLoanInfo = yield (0, getAllLoanInfo_1.getAllLoanInfo)(accountAddr, app_1.tokenPairKeys[tokenPairIndex]);
             const foundUserLoanAlert = yield UserAlert_1.UserAlertModel.find({ accountAddr: accountAddr, tokenPairIndex: tokenPairIndex });
             const data = AllLoanInfo.map((info) => {
-                return Object.assign(Object.assign({}, info), { alertStatus: foundUserLoanAlert.map((info) => info.escrowAddr).includes(info.loanEscrow) });
+                var _a, _b, _c;
+                return Object.assign(Object.assign({}, info), { alertStatus: foundUserLoanAlert.map((info) => info.escrowAddr).includes(info.loanEscrow), executed: (_a = (foundUserLoanAlert.find((loanalert) => loanalert.escrowAddr == info.loanEscrow))) === null || _a === void 0 ? void 0 : _a.executed, dateCreated: (_b = (foundUserLoanAlert.find((loanalert) => loanalert.escrowAddr == info.loanEscrow))) === null || _b === void 0 ? void 0 : _b.dateCreated, dateExecuted: (_c = (foundUserLoanAlert.find((loanalert) => loanalert.escrowAddr == info.loanEscrow))) === null || _c === void 0 ? void 0 : _c.dateExecetued });
             });
             return res.status(200).send({
                 status: true,
@@ -89,7 +91,7 @@ router.post("/createloanAlertTransaction", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { escrowAddr, tokenPairIndex, accountAddr } = req.body;
-            if (!escrowAddr || !tokenPairIndex || accountAddr) {
+            if (!escrowAddr || !tokenPairIndex || !accountAddr) {
                 return res.status(400).send({
                     status: false,
                     message: "Please provide the required fields",
@@ -102,6 +104,7 @@ router.post("/createloanAlertTransaction", function (req, res) {
                 });
             }
             const loanInfo = yield (0, getCurrentLoanInfo_1.getCurrentLoanInfo)(escrowAddr, app_1.tokenPairKeys[parseInt(tokenPairIndex)]);
+            console.log(Number(loanInfo.healthFactor) / (1e14));
             if (!loanInfo) {
                 return res.status(400).send({
                     status: true,
@@ -113,7 +116,8 @@ router.post("/createloanAlertTransaction", function (req, res) {
             const loanCreateTxn = (0, utils_1.transferAlgoOrAsset)(79413584, accountAddr, config_1.Address, 1e5, params);
             res.status(200).send({
                 status: true,
-                data: loanCreateTxn
+                data: (0, encodeTxn_1.encodeTxn)(loanCreateTxn),
+                currentHealthRatio: Number(loanInfo.healthFactor) / (1e14)
             });
         }
         catch (error) {
@@ -166,7 +170,7 @@ router.post('/newLoanTxn', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { collateralAmount, borrowAmount, tokenPairIndex, accountAddr } = req.body;
-            if (!collateralAmount || !borrowAmount || tokenPairIndex || accountAddr) {
+            if (!collateralAmount || !borrowAmount || !tokenPairIndex || !accountAddr) {
                 return res.status(400).send({
                     status: false,
                     message: "Please provide the required fields",
@@ -268,7 +272,8 @@ router.post("/repayLoanTxn", function (req, res) {
 router.post("/processtxn", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let { txns } = req.body;
-        let txId = yield (0, sendtxn_1.sendtxn)(txns);
+        //@ts-ignore
+        let txId = yield (0, sendtxn_1.sendtxn)(txns.map((txn) => new Uint8Array(txn)));
         return res.status(200).send({
             txid: txId
         });

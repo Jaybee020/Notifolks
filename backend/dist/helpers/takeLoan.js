@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.takeLoan = void 0;
 const src_1 = require("../src");
 const config_1 = require("../config");
+const encodeTxn_1 = require("./encodeTxn");
 function takeLoan(accountAddr, collateralAmount, borrowAmount, tokenPairKey) {
     return __awaiter(this, void 0, void 0, function* () {
         let txns;
@@ -26,12 +27,12 @@ function takeLoan(accountAddr, collateralAmount, borrowAmount, tokenPairKey) {
         txns = addEscrowTxns.txns;
         const signedEscrowTxn = txns[1].signTxn(escrow.sk);
         // // borrow
-        txns = (0, src_1.prepareBorrowTransactions)(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
+        let borrow_txns = (0, src_1.prepareBorrowTransactions)(tokenPair, oracle, accountAddr, escrow.addr, collateralAmount, borrowAmount, params);
         return {
             escrowAddr: escrow.addr,
-            signedEscrowTxn: signedEscrowTxn,
-            unsignedUserTxn: [txns[0], txns[2]],
-            borrowTxns: txns
+            signedEscrowTxn: Array.from(signedEscrowTxn),
+            unsignedUserTxn: [(0, encodeTxn_1.encodeTxn)(txns[0]), (0, encodeTxn_1.encodeTxn)(txns[2])],
+            borrowTxns: borrow_txns.map(encodeTxn_1.encodeTxn)
         };
     });
 }

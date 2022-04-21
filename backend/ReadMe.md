@@ -104,11 +104,11 @@ response.body
 ```http
 POST /folks/createloanAlertTransaction
 ```
-All parameters are to be in req.body.A transfer of 0.01 algos is made to create a new loan alert.
+All parameters are to be in req.body.This also checks if the loan is a valid loan.A transfer of 0.01 algos is made to create a new loan alert.
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
-| `tokenPairKeyIndex` | `string` | **Required**. token pair index to loan to be taken |
+| `tokenPairIndex` | `string` | **Required**. token pair index to loan to be taken |
 | `accountAddr` | `string` | **Required**. Address of user for loan |
 
 This returns a transaction to be signed by the client
@@ -168,7 +168,7 @@ response.body
 ```http
 POST /folks/repayLoanTxn
 ```
-All parameters are to be in req.body.A.
+All parameters are to be in req.body.
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `escrowAddr` | `string` | **Required**. Address of escrow account used for loan |
@@ -183,20 +183,6 @@ response.body
 {   status:true,
     data:Transaction
 }
-```
-
-#### Sends a signed traansaction to the blockchain 
-```http
-POST /folks/createloanAlertTransaction
-```
-All parameters are to be in req.body.A transfer of 0.1 algos is made to create a new loan alert.
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `txn` | `signedTx|signedTx[]` | **Required**. signed transaction or array of signed transactions |
-
-response.body
-```bash
-{   txId:string  }
 ```
 
 

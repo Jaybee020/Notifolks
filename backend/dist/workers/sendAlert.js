@@ -24,13 +24,18 @@ const alertsQueue = new bull_1.default("alerts", config_1.REDIS_URL);
 //Consumer queue process to be performed in background
 alertsQueue.process(function (job, done) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { recipient, title, message } = job.data;
-        let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, message, title);
-        console.log(`Email successfully sent to ${recipient}`);
-        if (sendEmailResponse.error) {
-            done(new Error("Error sending alert"));
+        try {
+            const { recipient, title, message } = job.data;
+            let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, message, title);
+            console.log(`Email successfully sent to ${recipient}`);
+            if (sendEmailResponse.error) {
+                done(new Error("Error sending alert"));
+            }
+            done();
         }
-        done();
+        catch (error) {
+            console.error(error);
+        }
     });
 });
 exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
@@ -46,7 +51,7 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                     console.log(anAlert.email);
                     const loanInfo = yield (0, getCurrentLoanInfo_1.getCurrentLoanInfo)(anAlert.escrowAddr, app_1.tokenPairKeys[anAlert.tokenPairIndex]);
                     console.log(loanInfo);
-                    if (loanInfo.healthFactor / BigInt(1e14) < BigInt(anAlert.reminderHealthRatio)) {
+                    if (Number(loanInfo.healthFactor) / (1e14) < Number(anAlert.reminderHealthRatio)) {
                         message = `${app_1.tokenPairKeys[anAlert.tokenPairIndex]} has just gone below your reminder health ratio of ${anAlert.reminderHealthRatio}.
                     Current health Ratio is  ${loanInfo.healthFactor}.`;
                         title = `${app_1.tokenPairKeys[anAlert.tokenPairIndex]} loan Alert!`;

@@ -14,9 +14,14 @@ const config_1 = require("../config");
 const algosdk_1 = require("algosdk");
 function sendtxn(signedTxns) {
     return __awaiter(this, void 0, void 0, function* () {
-        let txId = (yield config_1.algodClient.sendRawTransaction(signedTxns).do()).txId;
-        yield (0, algosdk_1.waitForConfirmation)(config_1.algodClient, txId, 1000);
-        return txId;
+        try {
+            let txId = (yield config_1.algodClient.sendRawTransaction(signedTxns).do()).txId;
+            yield (0, algosdk_1.waitForConfirmation)(config_1.algodClient, txId, 1000);
+            return txId;
+        }
+        catch (error) {
+            console.error(error);
+        }
     });
 }
 exports.sendtxn = sendtxn;
