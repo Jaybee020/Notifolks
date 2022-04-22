@@ -26,8 +26,7 @@ alertsQueue.process(function (job, done) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { recipient, title, message } = job.data;
-            let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, message, title);
-            console.log(`Email successfully sent to ${recipient}`);
+            let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, title, message);
             if (sendEmailResponse.error) {
                 done(new Error("Error sending alert"));
             }
@@ -53,7 +52,7 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                     console.log(loanInfo);
                     if (Number(loanInfo.healthFactor) / (1e14) < Number(anAlert.reminderHealthRatio)) {
                         message = `${app_1.tokenPairKeys[anAlert.tokenPairIndex]} has just gone below your reminder health ratio of ${anAlert.reminderHealthRatio}.
-                    Current health Ratio is  ${loanInfo.healthFactor}.`;
+                    Current health Ratio is  ${Number(loanInfo.healthFactor) / (1e14)}.`;
                         title = `${app_1.tokenPairKeys[anAlert.tokenPairIndex]} loan Alert!`;
                         recipient = anAlert.email;
                         //add to alerts Que
@@ -62,11 +61,9 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                             backoff: 3000,
                         });
                         //change executed status to true
-                        console.log("Reached here 3");
                         anAlert.executed = true;
                         anAlert.dateExecetued = new Date();
                         yield anAlert.save();
-                        console.log("Reached here 4");
                     }
                 }));
             }
