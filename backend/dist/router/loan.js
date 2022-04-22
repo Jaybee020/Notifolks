@@ -24,7 +24,6 @@ const repay_1 = require("../helpers/repay");
 const getAllLoanInfo_1 = require("../helpers/getAllLoanInfo");
 const utils_1 = require("../src/v1/utils");
 const config_2 = require("../config");
-const sendtxn_1 = require("../helpers/sendtxn");
 const findtxn_1 = require("../helpers/findtxn");
 const encodeTxn_1 = require("../helpers/encodeTxn");
 const router = express_1.default.Router();
@@ -267,16 +266,6 @@ router.post("/repayLoanTxn", function (req, res) {
                 message: "Could not repay loan "
             });
         }
-    });
-});
-router.post("/processtxn", function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { txns } = req.body;
-        //@ts-ignore
-        let txId = yield (0, sendtxn_1.sendtxn)(txns.map((txn) => new Uint8Array(txn)));
-        return res.status(200).send({
-            txid: txId
-        });
     });
 });
 exports.folksFinanceRouter = router;

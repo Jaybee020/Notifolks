@@ -26,8 +26,7 @@ alertsQueue.process(function (job, done) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { recipient, title, message } = job.data;
-            let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, message, title);
-            console.log(`Email successfully sent to ${recipient}`);
+            let sendEmailResponse = yield (0, sendEmail_1.sendEmail)(recipient, title, message);
             if (sendEmailResponse.error) {
                 done(new Error("Error sending alert"));
             }
@@ -62,11 +61,9 @@ exports.sendAlert = new cron_1.CronJob("*/25 * * * * *", function () {
                             backoff: 3000,
                         });
                         //change executed status to true
-                        console.log("Reached here 3");
                         anAlert.executed = true;
                         anAlert.dateExecetued = new Date();
                         yield anAlert.save();
-                        console.log("Reached here 4");
                     }
                 }));
             }

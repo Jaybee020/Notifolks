@@ -15,10 +15,9 @@ alertsQueue.process(async function(job,done){
 
         let sendEmailResponse = await sendEmail(
             recipient,
-            message,
-            title
+            title,
+            message
           );
-        console.log(`Email successfully sent to ${recipient}`)
         if (sendEmailResponse.error) {
             done(new Error("Error sending alert"));
         }
@@ -57,14 +56,13 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                           }
                     )
                     //change executed status to true
-                    console.log("Reached here 3")
                     anAlert.executed=true
                     anAlert.dateExecetued=new Date()
                     await anAlert.save()
-                    console.log("Reached here 4")
                 }
             })
         }else{}
+       
     } catch (error) {
         console.log(error)
     }
