@@ -339,10 +339,11 @@ input {
 * {
   font-size: 15px;
   box-sizing: border-box;
+  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-*::-webkit-scrollbar {
+body::-webkit-scrollbar {
   display: none;
 }
 
