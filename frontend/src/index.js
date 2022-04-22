@@ -1,3 +1,4 @@
+import "./axios";
 import "./index.scss";
 import App from "./App";
 import * as ReactDOMClient from "react-dom/client";

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { constrictAddr } from "../utils";
 import { useDispatch, useSelector } from "react-redux";
 
-const Navbar = () => {
+const Splash = () => {
   const dispatch = useDispatch();
 
   const [walletAddr, setWalletAddr] = useState(
@@ -37,31 +38,22 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="top_nav top_nav_first">
-      <div className="side_top_sect">
-        Noti-f
-        <i className="ph-bell-simple-fill" />
-        lks
-      </div>
-      {!!walletAddr ? (
-        <div className="nav_configs" onClick={onDisconnectWallet}>
-          <div className="wallet_address">
-            <p className="user_wallet">{constrictAddr(walletAddr)}</p>
-          </div>
+    <div className="pages_cover">
+      <div className="loans_inn_2">
+        <div className="splash_container">
+          <p className="hd">Notifications made easier</p>
+          <p className="sub">
+            Add alerts to your loans from the Folks Finance platform.
+          </p>
+          <button onClick={onConnectWallet}>Get Started with Notifolks</button>
+        </div>
 
-          <div className="copy_button">
-            <i className="ph-plugs-light"></i>
-          </div>
+        <div className="side_illustration">
+          <img src="/assets/PaymentIllustration.svg" alt="" />
         </div>
-      ) : (
-        <div className="nav_configs" onClick={onConnectWallet}>
-          <div className="wallet_address">
-            <p className="connect_wallet">Connect Wallet</p>
-          </div>
-        </div>
-      )}
-    </nav>
+      </div>
+    </div>
   );
 };
 
-export default Navbar;
+export default Splash;
