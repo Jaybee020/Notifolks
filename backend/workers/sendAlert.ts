@@ -43,7 +43,7 @@ export var sendAlert=new CronJob("*/25 * * * * *",async function () {
                 console.log(loanInfo)
                 if(Number(loanInfo.healthFactor)/(1e14)<Number(anAlert.reminderHealthRatio)){
                     message = `${tokenPairKeys[anAlert.tokenPairIndex]} has just gone below your reminder health ratio of ${anAlert.reminderHealthRatio}.
-                    Current health Ratio is  ${loanInfo.healthFactor}.`;
+                    Current health Ratio is  ${Number(loanInfo.healthFactor)/(1e14)}.`;
                     title = `${tokenPairKeys[anAlert.tokenPairIndex]} loan Alert!`;
                     recipient = anAlert.email;
     
