@@ -33,7 +33,7 @@ I worked `React`, `Redux`, `SASS`in the development of this platform.
 
 ## Status
 
-Notifolks is live and has can previewed and explored here: [Notifolks](https://notifolks.netlify.app)
+Notifolks is live 🎉 It can be previewed and explored here: [Notifolks](https://notifolks.netlify.app)
 
 ## Credits
 
