@@ -341,6 +341,9 @@ input {
   box-sizing: border-box;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body::-webkit-scrollbar {

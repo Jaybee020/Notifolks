@@ -8,7 +8,7 @@ const Loans = ({ loans, loading, currentPair }) => {
   const dispatch = useDispatch();
 
   return (
-    <div className="pages_cover">
+    <div className="pages_cover pages_cover_loans">
       <div className="loan_item_hd">
         <div className="loan_hasAlert">
           <p>
